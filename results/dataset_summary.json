@@ -1,0 +1,12 @@
+{
+  "training_samples": 175341,
+  "testing_samples": 82332,
+  "num_numeric_features": 39,
+  "num_categorical_features": 3,
+  "num_attack_classes": 10,
+  "class_imbalance_ratio": 430.7692307692308,
+  "ttl_features_available": [
+    "sttl",
+    "dttl"
+  ]
+}

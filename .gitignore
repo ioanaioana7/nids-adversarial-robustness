@@ -1,0 +1,11 @@
+# Date brute UNSW-NB15 (voluminoase, ~720MB; descarcabile separat, vezi README)
+Resources/
+
+# Predictii/probabilitati pe tot setul de test (voluminoase, regenerabile)
+results/predictions/
+results/training.log
+
+# Python
+__pycache__/
+*.pyc
+
