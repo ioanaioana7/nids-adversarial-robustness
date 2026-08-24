@@ -1,0 +1,422 @@
+{
+  "rule_type": "empirical_lookup",
+  "why_not_a_binning_rule": "Valori TTL adiacente produc ct_state_ttl diferit (vezi counterexamples), deci nicio partitionare pe intervale de TTL nu poate reproduce maparea. ct_state_ttl este un contor pe fereastra de 100 de conexiuni, imposibil de recalculat din inregistrari de flux izolate.",
+  "counterexamples": [
+    {
+      "pair": "sttl=62 vs sttl=63",
+      "state": "INT",
+      "dttl": 0,
+      "values": [
+        2,
+        0
+      ]
+    },
+    {
+      "pair": "sttl=254 vs sttl=252",
+      "state": "INT",
+      "dttl": 0,
+      "values": [
+        2,
+        0
+      ]
+    }
+  ],
+  "state_INT_dttl0_sttl_to_ct_state_ttl": {
+    "0": 2,
+    "1": 0,
+    "29": 0,
+    "31": 0,
+    "32": 0,
+    "60": 0,
+    "62": 2,
+    "63": 0,
+    "64": 0,
+    "252": 0,
+    "254": 2,
+    "255": 0
+  },
+  "coverage": {
+    "combos_train": 32,
+    "combos_test": 44,
+    "combos_test_unseen_in_train": 26,
+    "combos_in_lookup": 58,
+    "observed_ct_state_ttl_values": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  "policies": {
+    "hold": "ct_state_ttl pastrat neschimbat (margine conservatoare)",
+    "mimic": "lookup exact -> mod al traficului normal la acel sttl -> constanta 0"
+  },
+  "normal_traffic_sttl_to_ct_state_ttl": {
+    "0": 2,
+    "1": 0,
+    "29": 0,
+    "30": 0,
+    "31": 0,
+    "32": 0,
+    "60": 0,
+    "62": 1,
+    "63": 0,
+    "64": 0,
+    "252": 0,
+    "254": 1,
+    "255": 0
+  },
+  "lookup": [
+    {
+      "state": "ACC",
+      "sttl": 31,
+      "dttl": 29,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "ACC",
+      "sttl": 31,
+      "dttl": 30,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "ACC",
+      "sttl": 254,
+      "dttl": 252,
+      "ct_state_ttl": 4
+    },
+    {
+      "state": "CLO",
+      "sttl": 254,
+      "dttl": 252,
+      "ct_state_ttl": 5
+    },
+    {
+      "state": "CON",
+      "sttl": 0,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 29,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 29,
+      "dttl": 31,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 29,
+      "dttl": 32,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 30,
+      "dttl": 31,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 30,
+      "dttl": 32,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 31,
+      "dttl": 29,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 31,
+      "dttl": 30,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 32,
+      "dttl": 29,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 32,
+      "dttl": 30,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 60,
+      "dttl": 254,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 62,
+      "dttl": 252,
+      "ct_state_ttl": 3
+    },
+    {
+      "state": "CON",
+      "sttl": 62,
+      "dttl": 253,
+      "ct_state_ttl": 3
+    },
+    {
+      "state": "CON",
+      "sttl": 254,
+      "dttl": 60,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 254,
+      "dttl": 252,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "CON",
+      "sttl": 255,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "ECO",
+      "sttl": 63,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "ECO",
+      "sttl": 254,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "FIN",
+      "sttl": 29,
+      "dttl": 31,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "FIN",
+      "sttl": 29,
+      "dttl": 32,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "FIN",
+      "sttl": 31,
+      "dttl": 29,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "FIN",
+      "sttl": 31,
+      "dttl": 30,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "FIN",
+      "sttl": 32,
+      "dttl": 29,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "FIN",
+      "sttl": 32,
+      "dttl": 30,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "FIN",
+      "sttl": 62,
+      "dttl": 252,
+      "ct_state_ttl": 1
+    },
+    {
+      "state": "FIN",
+      "sttl": 62,
+      "dttl": 253,
+      "ct_state_ttl": 1
+    },
+    {
+      "state": "FIN",
+      "sttl": 63,
+      "dttl": 252,
+      "ct_state_ttl": 1
+    },
+    {
+      "state": "FIN",
+      "sttl": 252,
+      "dttl": 254,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "FIN",
+      "sttl": 254,
+      "dttl": 252,
+      "ct_state_ttl": 1
+    },
+    {
+      "state": "FIN",
+      "sttl": 254,
+      "dttl": 253,
+      "ct_state_ttl": 1
+    },
+    {
+      "state": "FIN",
+      "sttl": 255,
+      "dttl": 252,
+      "ct_state_ttl": 1
+    },
+    {
+      "state": "FIN",
+      "sttl": 255,
+      "dttl": 253,
+      "ct_state_ttl": 1
+    },
+    {
+      "state": "INT",
+      "sttl": 0,
+      "dttl": 0,
+      "ct_state_ttl": 2
+    },
+    {
+      "state": "INT",
+      "sttl": 1,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "INT",
+      "sttl": 29,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "INT",
+      "sttl": 31,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "INT",
+      "sttl": 32,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "INT",
+      "sttl": 60,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "INT",
+      "sttl": 62,
+      "dttl": 0,
+      "ct_state_ttl": 2
+    },
+    {
+      "state": "INT",
+      "sttl": 63,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "INT",
+      "sttl": 64,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "INT",
+      "sttl": 252,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "INT",
+      "sttl": 254,
+      "dttl": 0,
+      "ct_state_ttl": 2
+    },
+    {
+      "state": "INT",
+      "sttl": 255,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "PAR",
+      "sttl": 64,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "REQ",
+      "sttl": 1,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "REQ",
+      "sttl": 32,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "REQ",
+      "sttl": 254,
+      "dttl": 0,
+      "ct_state_ttl": 6
+    },
+    {
+      "state": "REQ",
+      "sttl": 255,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "RST",
+      "sttl": 62,
+      "dttl": 252,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "RST",
+      "sttl": 254,
+      "dttl": 60,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "RST",
+      "sttl": 254,
+      "dttl": 252,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "URN",
+      "sttl": 255,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    },
+    {
+      "state": "no",
+      "sttl": 254,
+      "dttl": 0,
+      "ct_state_ttl": 0
+    }
+  ]
+}

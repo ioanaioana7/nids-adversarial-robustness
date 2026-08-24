@@ -5,7 +5,18 @@ Resources/
 results/predictions/
 results/training.log
 
+# O2: log si matricile complete de variante (regenerabile determinist)
+results/perturbation/perturbation.log
+results/perturbation/variants/
+
+# FT-Transformer: checkpoint-ul de antrenare (tranzitoriu, ~10MB) si log-ul.
+# Modelul final, models/transformer_baseline.pt, se pastreaza.
+models/transformer_checkpoint.pt
+results/transformer_training.log
+
 # Python
 __pycache__/
 *.pyc
 
+# Random files
+docs/

@@ -1,0 +1,71 @@
+{
+  "model": "Transformer",
+  "architecture": "FT-Transformer (Gorishniy et al., NeurIPS 2021)",
+  "dataset": "UNSW-NB15",
+  "training_date": "2026-08-21T00:24:19.839809+00:00",
+  "random_seed": 42,
+  "git_commit": "2ee6982b7e39569e4938ffd01b196b66cf3ac5ad",
+  "device": "cuda",
+  "protocol": {
+    "train_split": "oficial UNSW_NB15_training-set.csv",
+    "test_split": "oficial UNSW_NB15_testing-set.csv",
+    "validation": "15% stratificat din TRAIN, niciodata din test",
+    "cross_validation": false,
+    "preprocessing_fit_on": "sub-setul de train (fara validare), ca early stopping-ul sa ramana nepartinitor"
+  },
+  "hyperparameters": {
+    "d_token": 192,
+    "n_blocks": 3,
+    "n_heads": 8,
+    "attn_dropout": 0.2,
+    "ffn_dropout": 0.1,
+    "residual_dropout": 0.0,
+    "ffn_hidden": 256,
+    "n_parameters": 789130,
+    "lr": 0.0001,
+    "weight_decay": 1e-05,
+    "batch_size": 512,
+    "max_epochs": 100,
+    "early_stopping_patience": 10,
+    "grad_clip_norm": 1.0,
+    "class_weighting": "balanced (invers frecventei, ca la arbori)"
+  },
+  "split_sizes": {
+    "train": 149039,
+    "validation": 26302,
+    "test": 82332
+  },
+  "training": {
+    "eval_only": true
+  },
+  "history": [],
+  "test_metrics": {
+    "accuracy": 0.6654399261526502,
+    "balanced_accuracy": 0.603765797011713,
+    "macro_f1": 0.453829076917852,
+    "weighted_f1": 0.7209223378200995
+  },
+  "verification": {
+    "reload_self_check": {
+      "rows": 100,
+      "mismatches": 0
+    },
+    "o2_identity": {
+      "rows": 45332,
+      "mismatches": 0
+    },
+    "schema_compatibility": {
+      "variant": "combined_mimic_L4",
+      "rows": 64
+    }
+  },
+  "library_versions": {
+    "python": "3.12.10",
+    "pandas": "3.0.5",
+    "numpy": "2.4.6",
+    "scikit_learn": "1.9.0",
+    "xgboost": "3.4.0",
+    "joblib": "1.5.3",
+    "torch": "2.5.1+cu124"
+  }
+}

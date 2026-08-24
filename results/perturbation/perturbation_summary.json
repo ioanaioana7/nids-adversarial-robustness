@@ -1,0 +1,30 @@
+{
+  "attack_rows": 45332,
+  "variants_generated": 28,
+  "checks_run": 1259,
+  "checks_failed": 0,
+  "identity_check": {
+    "RandomForest": {
+      "rows": 45332,
+      "mismatches": 0
+    },
+    "XGBoost": {
+      "rows": 45332,
+      "mismatches": 0
+    }
+  },
+  "eligible": {
+    "RandomForest": 45116,
+    "XGBoost": 44258
+  },
+  "persisted_full_variants": false,
+  "random_seed": 42,
+  "library_versions": {
+    "python": "3.12.10",
+    "pandas": "3.0.5",
+    "numpy": "2.4.6",
+    "scikit_learn": "1.9.0",
+    "xgboost": "3.4.0",
+    "joblib": "1.5.3"
+  }
+}

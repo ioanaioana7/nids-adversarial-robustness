@@ -28,19 +28,28 @@ def ensure_output_dirs() -> None:
         Path(directory).mkdir(parents=True, exist_ok=True)
 
 
-def setup_logging() -> logging.Logger:
-    """Configureaza logging-ul catre fisier (results/training.log) si consola.
+def setup_logging(log_path=None, logger_name: str = "nids_baseline",
+                  mode: str = "w") -> logging.Logger:
+    """Configureaza logging-ul catre fisier si consola.
+
+    Parameters:
+        log_path (Path | str | None): fisierul de log; implicit config.LOG_PATH.
+            O2 pasa config.PERTURBATION_LOG_PATH ca sa nu suprascrie log-ul O1.
+        logger_name (str): numele logger-ului, pentru a izola handler-ele intre etape.
+        mode (str): "w" suprascrie, "a" adauga. Antrenarea Transformer-ului
+            foloseste "a", ca reluarea dintr-un checkpoint sa nu piarda istoricul
+            rularii de peste noapte.
 
     Returns:
-        logging.Logger: logger-ul principal al experimentului.
+        logging.Logger: logger-ul principal al etapei.
     """
     ensure_output_dirs()
-    logger = logging.getLogger("nids_baseline")
+    logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
     logger.handlers.clear()
     logger.propagate = False
 
-    file_handler = logging.FileHandler(config.LOG_PATH, mode="w", encoding="utf-8")
+    file_handler = logging.FileHandler(log_path or config.LOG_PATH, mode=mode, encoding="utf-8")
     file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
     logger.addHandler(file_handler)
 
