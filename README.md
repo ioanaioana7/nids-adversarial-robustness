@@ -129,6 +129,88 @@ Antrenarea salveaza checkpoint-uri periodic, deci o intrerupere nu pierde progre
 relansarea aceleiasi comenzi continua de unde a ramas. `--fresh` reia de la zero,
 `--eval-only` regenereaza artefactele din modelul deja salvat.
 
+## Modelul de amenintare (O2)
+
+Trebuie enuntat explicit in lucrare, pentru ca fixeaza ce inseamna "evaziune" aici.
+
+| Dimensiune | Alegere | Motiv |
+|---|---|---|
+| Acces la model | **Black-box, fara interogari** | Un atacator real nu poate interoga IDS-ul aparatorului si nu ii vede gradientii. |
+| Strategie | **Neadaptiva, grila structurata** | Intrebarea de cercetare e *ce tipuri de modificare conteaza si cat*, nu *care e perturbarea adversariala minima*. |
+| Capabilitate | **Doar partea sursa** | Atacatorul isi controleaza propriile pachete, nu si raspunsurile victimei. |
+| Constrangere | **Atacul trebuie sa ramana functional** | Perturbarile au directie impusa si limite fizice. |
+
+Deliberat **nu** este un atac prin optimizare (FGSM/PGD/ZOO). Acelea cer acces la gradient
+sau la interogari repetate, pe care atacatorul din acest model de amenintare nu le are, si
+produc vectori de caracteristici deseori imposibil de realizat ca trafic real. FT-Transformer-ul
+fiind diferentiabil, atacurile pe gradient raman o extindere viitoare naturala — exista un
+hook documentat in `src/transformer/predictor.py::logits_with_grad`, neimplementat intentionat,
+ca toate cele trei modele sa fie comparate pe aceleasi perturbari realizabile.
+
+**Directia e impusa, nu doar intentionata:** padding-ul poate doar sa creasca numarul de octeti
+(nu poti "retrage" date deja trimise), temporizarea poate doar sa creasca durata (poti oricand
+trimite mai lent, niciodata mai repede decat permite reteaua), iar contoarele de conexiuni pot
+doar sa scada (atacatorul isi poate incetini oricand scanarea). Limitele se aplica *relativ la
+randul original*, fiindca captura reala incalca deja unele dintre ele: 61 de fluxuri de atac au
+`sttl` in {0,1} si o inregistrare are `smean=1504 > MTU`.
+
+### Constatarea principala: `sttl` este un artefact al setului de date
+
+| Trafic | `sttl` dominant |
+|---|---|
+| Normal | **31** (70.5%), 254 (20.1%), 62 (3.9%) |
+| Fiecare clasa de atac | **254** (60–100%), 62 secundar |
+
+Traficul de atac sta aproape universal la `sttl=254` pentru ca generatorul IXIA PerfectStorm
+s-a aflat la o distanta fixa in hop-uri fata de senzor. `sttl` este caracteristica cea mai
+corelata cu eticheta (r = 0.69). Un atacator o schimba cu un singur apel `setsockopt`, cu cost
+zero si fara niciun efect asupra functionarii atacului. Daca detectia se prabuseste la aceasta
+schimbare, modelul citea amprenta generatorului, nu atacul.
+
+Traficul normal contine si el 11.230 de randuri la `sttl=254` (in setul de train; 26.279 in
+train+test), deci modelul a invatat o corelatie, nu o regula. Aceasta e observatia care face
+din perturbarea TTL piesa centrala a lucrarii.
+
+### `ct_state_ttl`: de ce se raporteaza doua margini, nu o valoare
+
+`ct_state_ttl` **nu** este o functie pe intervale de TTL, in ciuda descrierii din documentatia
+setului de date. Contraexemple, verificate direct pe date: `sttl=62 -> 2` dar `sttl=63 -> 0`;
+`sttl=254 -> 2` dar `sttl=252 -> 0`. Valori TTL adiacente dau iesiri diferite, deci nicio
+partitionare pe intervale nu poate reproduce maparea. Se comporta exact ca numaratorul pe
+fereastra glisanta de 100 de conexiuni pe care il sugereaza numele, si **nu poate fi recalculat
+din inregistrari de flux izolate** — informatia necesara (ordinea si timpii tuturor conexiunilor
+din captura) nu exista in date.
+
+Asta conteaza: `ct_state_ttl` este a doua caracteristica dupa corelatia cu eticheta (r = 0.58),
+iar `ct_state_ttl = 0` este semnatura traficului normal, in timp ce valorile nenule apartin
+grupului de atac (ex. `(FIN, 31, 29) -> 0` apare in 40.524 de randuri, 0% atacuri, fata de
+`(INT, 254, 0) -> 2` in 111.924 de randuri, 94% atacuri).
+
+Cand `sttl` devine 31, **34,3% dintre randurile eligibile** (15.492, majoritatea `FIN` cu
+`dttl=252`) ajung pe combinatii nevazute niciodata in date. Alegerea variantei de rezerva ar fi
+determinat in tacere rezultatul principal, asa ca O2 emite **ambele margini**, ca variante
+etichetate separat:
+
+| Politica | Comportament | Directia erorii |
+|---|---|---|
+| `hold` | `ct_state_ttl` ramane neschimbat | conservator — **subestimeaza** evaziunea (lasa intact un semnal puternic de atac) |
+| `mimic` | lookup exact -> modul traficului normal la acel `sttl` -> constanta 0 | optimist — **supraestimeaza** evaziunea (presupune ca atacatorul se camufleaza complet) |
+
+`mimic` este empiric, nu "pune 0": la `sttl=62` lasa distributia practic neschimbata, pentru ca
+fluxurile reale cu `sttl=62` din aceasta captura *sunt* dominate de atacuri. La `sttl=31` si 64
+duce totul la 0.
+
+Capabilitatea reala a atacatorului se afla intre cele doua. **O3 trebuie sa raporteze un
+interval** ("evaziunea prin TTL este intre X% si Y%"), nu o singura cifra: distanta dintre
+margini e ea insasi un rezultat, fiindca masoara cat din robustetea modelului depinde de o
+caracteristica pe care nici atacatorul nu o controleaza direct, nici aparatorul nu o poate
+recalcula. Dovezile complete si tabelul de lookup sunt in `results/perturbation/ct_state_ttl_rule.json`.
+
+Varianta `ttl_both` perturba si `dttl`, care apartine victimei si e imposibil de atins de
+atacator. Exista **doar** ca referinta de margine superioara, ca sa cuantifice cat din
+dependenta modelului de TTL sta pe ceva inaccesibil, si nu trebuie raportata ca evaziune
+realizabila.
+
 ## Predictie determinista (obligatoriu pentru O3)
 
 Toate predictiile cu modelele inghetate trebuie sa treaca prin `src/inference.py`,
