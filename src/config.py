@@ -171,6 +171,35 @@ PERTURBATION_PERSIST_VARIANTS = False     # True => salveaza matricile complete
 PERTURBATION_SAMPLE_ROWS = 200            # randuri per variant salvate pentru inspectie
 
 # --------------------------------------------------------------------------
+# O3 — masurarea ratei de evaziune
+# --------------------------------------------------------------------------
+# Taxonomia celor trei rezultate posibile ale unei perturbari (din obiectivele
+# lucrarii). Un flux perturbat poate: (a) sa ramana clasificat corect,
+# (b) sa devina "trafic normal" — evaziune propriu-zisa, (c) sa fie confundat
+# cu un alt tip de atac, ceea ce spune ceva despre fragilitatea granitelor
+# dintre clasele de atac.
+OUTCOME_CORRECT = "correct"
+OUTCOME_EVADED = "evaded"
+OUTCOME_MISCLASSIFIED_ATTACK = "misclassified_attack"
+OUTCOME_ORDER = [OUTCOME_CORRECT, OUTCOME_MISCLASSIFIED_ATTACK, OUTCOME_EVADED]
+
+# Variante excluse din cifrele principale: ttl_both perturba si dttl, care
+# apartine victimei si nu poate fi atins de atacator. Ramane in fisiere ca
+# referinta de margine superioara, etichetata explicit.
+EVASION_NON_REALIZABLE_TYPES = ["ttl_both"]
+
+# Perechile hold/mimic marginesc ambiguitatea ct_state_ttl (vezi README).
+# O3 raporteaza un interval, nu o singura cifra.
+EVASION_BOUND_PAIRS = {"ttl": ("ttl_hold", "ttl_mimic"),
+                       "combined": ("combined_hold", "combined_mimic")}
+
+# Sub acest prag, rata de evaziune per clasa e prea zgomotoasa ca sa fie
+# interpretata singura (Worms are 44 de randuri in test).
+EVASION_MIN_CLASS_SUPPORT = 100
+
+EVASION_PERSIST_PER_ROW = True     # rezultate per rand, necesare pentru O4
+
+# --------------------------------------------------------------------------
 # Directoare de iesire
 # --------------------------------------------------------------------------
 RESULTS_DIR = PROJECT_ROOT / "results"
@@ -186,6 +215,10 @@ PERTURBATION_DIR = RESULTS_DIR / "perturbation"
 PERTURBATION_SAMPLES_DIR = PERTURBATION_DIR / "samples"
 PERTURBATION_VARIANTS_DIR = PERTURBATION_DIR / "variants"
 PERTURBATION_LOG_PATH = PERTURBATION_DIR / "perturbation.log"
+
+EVASION_DIR = RESULTS_DIR / "evasion"
+EVASION_PER_ROW_DIR = EVASION_DIR / "per_row"
+EVASION_LOG_PATH = EVASION_DIR / "evasion.log"
 
 RF_MODEL_PATH = MODELS_DIR / "rf_baseline.joblib"
 XGB_MODEL_PATH = MODELS_DIR / "xgb_baseline.joblib"
@@ -205,4 +238,5 @@ OUTPUT_DIRECTORIES = [
     MODELS_DIR, FIGURES_DIR, METRICS_DIR,
     FEATURE_IMPORTANCE_DIR, EDA_DIR, PREDICTIONS_DIR,
     PERTURBATION_DIR, PERTURBATION_SAMPLES_DIR,
+    EVASION_DIR, EVASION_PER_ROW_DIR,
 ]

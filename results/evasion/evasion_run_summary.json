@@ -1,0 +1,52 @@
+{
+  "measured_at": "2026-08-25T15:33:37.390385+00:00",
+  "attack_rows": 45332,
+  "variants": 28,
+  "models": [
+    "RandomForest",
+    "XGBoost",
+    "Transformer"
+  ],
+  "eligible": {
+    "RandomForest": 45116,
+    "XGBoost": 44258,
+    "Transformer": 45302
+  },
+  "identity_invariant": {
+    "RandomForest": {
+      "evasion_rate": 0.0,
+      "n_eligible": 45116
+    },
+    "XGBoost": {
+      "evasion_rate": 0.0,
+      "n_eligible": 44258
+    },
+    "Transformer": {
+      "evasion_rate": 0.0,
+      "n_eligible": 45302
+    }
+  },
+  "per_row_files": {
+    "RandomForest": {
+      "rows": 1263248,
+      "path": "outcomes_randomforest.csv.gz"
+    },
+    "Transformer": {
+      "rows": 1268456,
+      "path": "outcomes_transformer.csv.gz"
+    },
+    "XGBoost": {
+      "rows": 1239224,
+      "path": "outcomes_xgboost.csv.gz"
+    }
+  },
+  "random_seed": 42,
+  "library_versions": {
+    "python": "3.12.10",
+    "pandas": "3.0.5",
+    "numpy": "2.4.6",
+    "scikit_learn": "1.9.0",
+    "xgboost": "3.4.0",
+    "joblib": "1.5.3"
+  }
+}

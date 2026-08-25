@@ -14,6 +14,11 @@ results/perturbation/variants/
 models/transformer_checkpoint.pt
 results/transformer_training.log
 
+# O3: rezultate per flux (~26MB, 3.8M randuri) si log. Regenerabile determinist
+# cu `python run_evasion.py`; tabelele agregate si figurile raman versionate.
+results/evasion/per_row/
+results/evasion/evasion.log
+
 # Python
 __pycache__/
 *.pyc

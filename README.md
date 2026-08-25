@@ -85,6 +85,15 @@ results/
     label_mapping.json
     feature_names.csv
 
+run_evasion.py                    # O3: masoara rata de evaziune pe variantele O2
+src/evasion/
+    outcomes.py                    # taxonomia celor trei rezultate + metrici
+    measurement.py                 # parcurgerea grilei variante x modele
+    aggregation.py                 # tabele agregate, intervale, intensitate minima
+    figures.py                     # graficele de evaziune
+    runner.py                      # orchestrare + artefacte
+results/evasion/                   # rate, intervale, defalcari, rezultate per flux
+
 run_perturbation.py               # O2: genereaza variantele perturbate (modele inghetate)
 src/perturbation/
     schema.py                      # taxonomia caracteristicilor + limite de domeniu
@@ -211,6 +220,53 @@ atacator. Exista **doar** ca referinta de margine superioara, ca sa cuantifice c
 dependenta modelului de TTL sta pe ceva inaccesibil, si nu trebuie raportata ca evaziune
 realizabila.
 
+## Rezultatele evaziunii (O3)
+
+`python run_evasion.py` (~5 min) masoara, pentru fiecare (model, tip, nivel), ce se
+intampla cu cele 45.332 de fluxuri de atac. Totul se raporteaza la fluxurile
+**eligibile** — cele pe care modelul le-a semnalat ca malitioase pe traficul curat
+(RF 45.116, XGBoost 44.258, Transformer 45.302). Un flux pe care modelul nu l-a prins
+niciodata nu poate "evada"; includerea lui ar transforma esecuri preexistente ale
+modelului in succese ale atacatorului.
+
+**Invariant verificat:** la nivelul 0 (varianta-identitate) rata de evaziune este
+exact 0,00% pentru toate cele trei modele — prin definitia setului eligibil.
+
+### Rata de evaziune, cifre principale (% din fluxurile eligibile)
+
+| Model | TTL -> sttl=31 | TTL + padding + timing (nivel max) | padding singur | timing singur | rata conexiuni |
+|---|---|---|---|---|---|
+| Random Forest | 4,4 – 18,4% | 31,3 – 75,9% | 0,1% | 0,7% | 0,3% |
+| XGBoost | **50,2 – 51,1%** | **96,4 – 96,9%** | 1,2% | 1,1% | 0,3% |
+| FT-Transformer | 10,7 – 72,1% | 30,8 – 76,6% | 0,1% | 0,0% | 0,0% |
+
+Intervalele sunt marginile `hold`..`mimic` explicate mai sus. Cifrele nu includ
+`ttl_both`, varianta nerealizabila.
+
+**TTL este singurul vector care conteaza.** Padding-ul, temporizarea si reducerea
+ratei de conexiuni, aplicate singure, lasa evaziunea sub ~1,2% la orice nivel de
+intensitate — modelele sunt practic insensibile la ele. O singura modificare de TTL,
+care costa un apel `setsockopt` si nu afecteaza deloc functionarea atacului, duce
+XGBoost de la 0% la peste 50%. Combinat cu padding si temporizare, ajunge la 96%.
+Aceasta este confirmarea empirica directa a constatarii ca `sttl` era un artefact
+al generatorului, nu un semnal despre atac.
+
+**Nivelurile TTL nu sunt o scara de intensitate.** Sunt valori tinta — sttl 64, 62,
+31 — iar nivelul 2 (`sttl=62`) este o valoare asociata *traficului de atac*, nu celui
+normal. De aceea evaziunea scade la nivelul 2 in loc sa creasca: la `sttl=62`
+politica `mimic` nu curata deloc semnatura `ct_state_ttl` (0% dintre fluxuri ajung
+la valoarea benigna 0, fata de 100% la nivelurile 1 si 3), deci cele doua margini
+coincid si intervalul se inchide. Este un rezultat interpretabil, nu o anomalie.
+
+**Cine e mai robust depinde de intrebare.** XGBoost are cele mai bune metrici pe
+traficul curat (macro F1 0,51) dar cedeaza cel mai usor la perturbarea TTL; Random
+Forest are marginea conservatoare cea mai mica. Robustetea si acuratetea nu merg in
+aceeasi directie — exact ipoteza de la care porneste lucrarea.
+
+Grafice: `results/figures/evasion_curves.png` (rata pe niveluri, cu benzile
+hold-mimic), `evasion_outcomes_<model>.png` (compozitia celor trei rezultate) si
+`evasion_per_class_<model>.png` (defalcare pe clase de atac).
+
 ## Predictie determinista (obligatoriu pentru O3)
 
 Toate predictiile cu modelele inghetate trebuie sa treaca prin `src/inference.py`,
@@ -274,6 +330,7 @@ acelasi jurnal al rularii.
       aceeasi interfata ca modelele sklearn, deci O3 nu are nevoie de ramificatii per model
 - [x] Cale de predictie determinista (`src/inference.py`) — elimina variatia intre
       rulari data de egalitatile din Random Forest, altfel O3 ar numara evaziuni fantoma
-- [ ] Masurare rata de evaziune (O3)
+- [x] Masurare rata de evaziune (O3) — `python run_evasion.py`; 28 de variante x 3 modele,
+      raportata ca interval hold..mimic; varianta-identitate da exact 0% evaziune
 - [ ] Analiza de sensibilitate (O4)
 - [ ] Interfata (O5)
