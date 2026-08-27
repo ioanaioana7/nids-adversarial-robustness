@@ -1,0 +1,68 @@
+{
+  "analysed_at": "2026-08-27T12:40:30.329592+00:00",
+  "sample_size": 14999,
+  "n_repeats": 5,
+  "focus_variant": "ttl_mimic_L3",
+  "divergence_class": "Generic",
+  "correlations": [
+    {
+      "model": "RandomForest",
+      "n_variants": 26,
+      "spearman_importance_mass": 0.9182,
+      "pvalue_importance_mass": 0.0,
+      "spearman_importance_mass_weighted": 0.9536,
+      "pvalue_importance_mass_weighted": 0.0
+    },
+    {
+      "model": "Transformer",
+      "n_variants": 26,
+      "spearman_importance_mass": 0.801,
+      "pvalue_importance_mass": 1e-06,
+      "spearman_importance_mass_weighted": 0.8252,
+      "pvalue_importance_mass_weighted": 0.0
+    },
+    {
+      "model": "XGBoost",
+      "n_variants": 26,
+      "spearman_importance_mass": 0.8795,
+      "pvalue_importance_mass": 0.0,
+      "spearman_importance_mass_weighted": 0.8816,
+      "pvalue_importance_mass_weighted": 0.0
+    }
+  ],
+  "attribution": [
+    {
+      "model": "RandomForest",
+      "total_detection_drop": 5.0206,
+      "perturbable_share_pct": 53.55,
+      "top_feature": "sttl",
+      "top_feature_drop": 0.993,
+      "top_feature_share_pct": 19.78
+    },
+    {
+      "model": "Transformer",
+      "total_detection_drop": 11.8092,
+      "perturbable_share_pct": 37.28,
+      "top_feature": "dttl",
+      "top_feature_drop": 5.9675,
+      "top_feature_share_pct": 50.53
+    },
+    {
+      "model": "XGBoost",
+      "total_detection_drop": 20.1502,
+      "perturbable_share_pct": 84.05,
+      "top_feature": "sttl",
+      "top_feature_drop": 10.9954,
+      "top_feature_share_pct": 54.57
+    }
+  ],
+  "random_seed": 42,
+  "library_versions": {
+    "python": "3.12.10",
+    "pandas": "3.0.5",
+    "numpy": "2.4.6",
+    "scikit_learn": "1.9.0",
+    "xgboost": "3.4.0",
+    "joblib": "1.5.3"
+  }
+}

@@ -1,0 +1,8 @@
+true_label,Analysis,Backdoor,Exploits,Generic
+Analysis,0.0,82.61,17.39,0.0
+Backdoor,95.79,0.0,4.21,0.0
+DoS,70.21,27.49,1.92,0.37
+Exploits,75.84,24.16,0.0,0.0
+Fuzzers,86.79,10.19,3.02,0.0
+Generic,88.89,0.0,11.11,0.0
+Reconnaissance,67.61,32.39,0.0,0.0

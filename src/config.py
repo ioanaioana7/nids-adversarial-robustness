@@ -200,6 +200,27 @@ EVASION_MIN_CLASS_SUPPORT = 100
 EVASION_PERSIST_PER_ROW = True     # rezultate per rand, necesare pentru O4
 
 # --------------------------------------------------------------------------
+# O4 — analiza de sensibilitate
+# --------------------------------------------------------------------------
+# Importanta caracteristicilor exista deocamdata doar pentru Random Forest
+# (impurity + SHAP). Ca sa putem corela evaziunea cu importanta PER MODEL, avem
+# nevoie de o masura comparabila intre RF, XGBoost si Transformer. Alegerea:
+# importanta prin permutare, calculata pe modelele INGHETATE — model-agnostica,
+# aceeasi unitate pentru toate trei, fara reantrenare.
+#
+# Metrica principala e scaderea RATEI DE DETECTIE pe fluxurile de atac (cate
+# raman semnalate ca malitioase). E deliberat aceeasi marime pe care o masoara
+# evaziunea in O3, deci corelatia dintre "cat de important e ce am perturbat" si
+# "cata evaziune a rezultat" compara lucruri comensurabile.
+SENSITIVITY_SAMPLE_SIZE = 15000       # esantion stratificat din setul de test
+SENSITIVITY_N_REPEATS = 5             # permutari per caracteristica
+SENSITIVITY_TOP_FEATURES = 20         # cate se afiseaza in figuri
+
+# Clasa unde modelele diverg cel mai puternic sub perturbarea TTL (arbori 1.5-5.5%
+# vs Transformer 97.3%): merita o analiza de importanta restransa la ea.
+SENSITIVITY_DIVERGENCE_CLASS = "Generic"
+
+# --------------------------------------------------------------------------
 # Directoare de iesire
 # --------------------------------------------------------------------------
 RESULTS_DIR = PROJECT_ROOT / "results"
@@ -220,6 +241,9 @@ EVASION_DIR = RESULTS_DIR / "evasion"
 EVASION_PER_ROW_DIR = EVASION_DIR / "per_row"
 EVASION_LOG_PATH = EVASION_DIR / "evasion.log"
 
+SENSITIVITY_DIR = RESULTS_DIR / "sensitivity"
+SENSITIVITY_LOG_PATH = SENSITIVITY_DIR / "sensitivity.log"
+
 RF_MODEL_PATH = MODELS_DIR / "rf_baseline.joblib"
 XGB_MODEL_PATH = MODELS_DIR / "xgb_baseline.joblib"
 
@@ -238,5 +262,5 @@ OUTPUT_DIRECTORIES = [
     MODELS_DIR, FIGURES_DIR, METRICS_DIR,
     FEATURE_IMPORTANCE_DIR, EDA_DIR, PREDICTIONS_DIR,
     PERTURBATION_DIR, PERTURBATION_SAMPLES_DIR,
-    EVASION_DIR, EVASION_PER_ROW_DIR,
+    EVASION_DIR, EVASION_PER_ROW_DIR, SENSITIVITY_DIR,
 ]

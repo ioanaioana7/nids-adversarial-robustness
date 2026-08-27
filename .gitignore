@@ -19,6 +19,9 @@ results/transformer_training.log
 results/evasion/per_row/
 results/evasion/evasion.log
 
+# O4: log (tabelele si figurile raman versionate, sunt mici)
+results/sensitivity/sensitivity.log
+
 # Python
 __pycache__/
 *.pyc

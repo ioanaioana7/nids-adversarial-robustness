@@ -85,6 +85,15 @@ results/
     label_mapping.json
     feature_names.csv
 
+run_sensitivity.py                # O4: analiza de sensibilitate (importanta <-> evaziune)
+src/sensitivity/
+    importance.py                  # importanta prin permutare, comparabila intre modele
+    linkage.py                     # leaga ce s-a perturbat de cat de important era
+    outcomes_analysis.py           # destinatiile confuziei, proximitatea de granita
+    figures.py                     # graficele O4
+    runner.py                      # orchestrare + artefacte
+results/sensitivity/               # importante, corelatii, destinatii, atribuire
+
 run_evasion.py                    # O3: masoara rata de evaziune pe variantele O2
 src/evasion/
     outcomes.py                    # taxonomia celor trei rezultate + metrici
@@ -137,6 +146,13 @@ python train_transformer.py
 Antrenarea salveaza checkpoint-uri periodic, deci o intrerupere nu pierde progresul:
 relansarea aceleiasi comenzi continua de unde a ramas. `--fresh` reia de la zero,
 `--eval-only` regenereaza artefactele din modelul deja salvat.
+
+Pentru masurarea evaziunii (O3) si analiza de sensibilitate (O4), in aceasta ordine:
+
+```bash
+python run_evasion.py       # ~5 min; necesita O2 rulat
+python run_sensitivity.py   # ~8 min; necesita O2 si O3 rulate
+```
 
 ## Modelul de amenintare (O2)
 
@@ -267,6 +283,46 @@ Grafice: `results/figures/evasion_curves.png` (rata pe niveluri, cu benzile
 hold-mimic), `evasion_outcomes_<model>.png` (compozitia celor trei rezultate) si
 `evasion_per_class_<model>.png` (defalcare pe clase de atac).
 
+## Analiza de sensibilitate (O4)
+
+`python run_sensitivity.py` explica DE CE apar ratele din O3. Importantele native nu
+se pot compara intre modele (RF are impuritate, XGBoost "gain", Transformer atentie),
+deci se calculeaza importanta prin permutare — model-agnostica, aceeasi definitie
+pentru toate trei. Metrica e scaderea ratei de detectie pe fluxurile de atac, adica
+exact marimea complementara evaziunii, deci cele doua sunt comensurabile.
+
+| Model | Caracteristica dominanta | Cota ei | Din importanta totala, cat poate atinge atacatorul |
+|---|---|---|---|
+| Random Forest | `sttl` | 19,8% | 53,5% |
+| XGBoost | `sttl` | **54,6%** | **84,0%** |
+| FT-Transformer | `dttl` | 50,5% | 37,3% |
+
+Tabelul explica rezultatele din O3. XGBoost concentreaza peste jumatate din capacitatea
+de detectie intr-o singura caracteristica pe care atacatorul o schimba cu un apel
+`setsockopt` — de aici 50% evaziune. Random Forest o distribuie, deci cedeaza mai putin.
+Transformer-ul se sprijina cel mai mult pe `dttl`, TTL-ul *victimei*, pe care atacatorul
+nu il poate atinge — de aceea evaziunea lui realizabila e marginita, si de aceea varianta
+nerealizabila `ttl_both` (singura care atinge `dttl`) ajunge la 96,8% pentru el.
+
+**Corelatia ceruta de obiectiv:** perturbarile care ating mai multa importanta produc
+mai multa evaziune — Spearman rho = 0,95 (RF), 0,88 (XGBoost), 0,83 (Transformer),
+toate cu p < 0,0001 peste cele 26 de variante realizabile.
+
+**Rezultatul (c) — fiecare model are o clasa "atractor".** Fluxurile care nu evadeaza
+dar isi schimba eticheta ajung covarsitor intr-o singura clasa: `Backdoor` la Random
+Forest, `Analysis` la XGBoost, `DoS` la Transformer. Nu e intamplator: `Analysis` si
+`Backdoor` sunt exact clasele cu cel mai slab F1 de baza (0,02-0,11). Atractorul e
+regiunea in care modelul nu are un angajament ferm.
+
+**Atributia pe o singura caracteristica subestimeaza vulnerabilitatea.** Pe clasa
+`Generic`, detectia Transformer-ului scade de la 100% la 98,8% cu un `sttl` aleator si
+la 95,8% cu `sttl=31` singur — dar la **2,7%** cand `sttl=31` si `ct_state_ttl=0` sunt
+puse coerent impreuna. Nicio analiza care schimba o caracteristica pe rand nu ar fi
+detectat asta. Justifica retroactiv decizia centrala din O2: propagarea consistenta a
+caracteristicilor derivate, nu perturbarea lor izolata.
+
+Detalii complete in `docs/o4_sensitivity_analysis.md` (local, `docs/` nu e versionat).
+
 ## Predictie determinista (obligatoriu pentru O3)
 
 Toate predictiile cu modelele inghetate trebuie sa treaca prin `src/inference.py`,
@@ -332,5 +388,6 @@ acelasi jurnal al rularii.
       rulari data de egalitatile din Random Forest, altfel O3 ar numara evaziuni fantoma
 - [x] Masurare rata de evaziune (O3) — `python run_evasion.py`; 28 de variante x 3 modele,
       raportata ca interval hold..mimic; varianta-identitate da exact 0% evaziune
-- [ ] Analiza de sensibilitate (O4)
+- [x] Analiza de sensibilitate (O4) — `python run_sensitivity.py`; importanta prin
+      permutare comparabila intre modele, corelata cu evaziunea (Spearman rho 0,83-0,95)
 - [ ] Interfata (O5)
