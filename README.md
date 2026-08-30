@@ -120,7 +120,9 @@ src/transformer/
     training.py                    # antrenare, ponderi de clasa, early stopping, checkpointing
     runner.py                      # orchestrare + scrierea artefactelor
 
-ui/                                # interfata de vizualizare (O5)  [neinceput]
+ui/                               # O5: interfata de vizualizare si testare interactiva
+    app.py                         # aplicatia Streamlit (4 taburi)
+    live_perturbation.py           # perturbare cu parametri arbitrari, pe primitivele O2
 ```
 
 ## Cum se rulează (baseline)
@@ -152,6 +154,13 @@ Pentru masurarea evaziunii (O3) si analiza de sensibilitate (O4), in aceasta ord
 ```bash
 python run_evasion.py       # ~5 min; necesita O2 rulat
 python run_sensitivity.py   # ~8 min; necesita O2 si O3 rulate
+```
+
+Pentru interfata interactiva (O5):
+
+```bash
+pip install streamlit
+streamlit run ui/app.py
 ```
 
 ## Modelul de amenintare (O2)
@@ -323,6 +332,38 @@ caracteristicilor derivate, nu perturbarea lor izolata.
 
 Detalii complete in `docs/o4_sensitivity_analysis.md` (local, `docs/` nu e versionat).
 
+## Interfata interactiva (O5)
+
+```bash
+pip install streamlit
+streamlit run ui/app.py
+```
+
+Modelele inghetate se incarca o singura data (~23 s) si raman in cache; dupa aceea
+perturbarile se aplica live. Patru taburi:
+
+| Tab | Ce face |
+|---|---|
+| **Testare pe grup** | Alegi o clasa de atac si misti controalele; rata de evaziune a celor trei modele se recalculeaza pe loc |
+| **Flux individual** | Un singur flux: ce caracteristici s-au schimbat si cum se muta decizia si probabilitatile fiecarui model |
+| **Rezultate masurate** | Tabelele si figurile din O3/O4 |
+| **De ce cedeaza modelele** | Concentrarea importantei si corelatia din O4 |
+
+Controalele permit **valori arbitrare**, nu doar cele 28 de variante din grila: orice
+`sttl` intre 16 si 255, orice procent de padding, orice factor de temporizare, plus
+politica `ct_state_ttl`.
+
+**Interfata nu reimplementeaza perturbarea.** `ui/live_perturbation.py` compune exact
+aceleasi primitive validate din O2 (`dependencies.propagate`,
+`dependencies.resolve_ct_state_ttl`, `schema.restore_dtypes`) si trece fiecare varianta
+prin `validators.validate`. Doua consecinte:
+
+- date aceleasi valori ca un nivel din grila, interfata reproduce **exact** varianta
+  corespunzatoare din O2 (verificat pe 7 variante: `ttl_hold`, `ttl_mimic`, `padding`,
+  `timing`, `connection_rate`);
+- o combinatie arbitrara care ar incalca o constrangere fizica e semnalata ca invalida,
+  deci nu se poate afisa o "evaziune" obtinuta cu un flux imposibil de produs in realitate.
+
 ## Predictie determinista (obligatoriu pentru O3)
 
 Toate predictiile cu modelele inghetate trebuie sa treaca prin `src/inference.py`,
@@ -390,4 +431,5 @@ acelasi jurnal al rularii.
       raportata ca interval hold..mimic; varianta-identitate da exact 0% evaziune
 - [x] Analiza de sensibilitate (O4) — `python run_sensitivity.py`; importanta prin
       permutare comparabila intre modele, corelata cu evaziunea (Spearman rho 0,83-0,95)
-- [ ] Interfata (O5)
+- [x] Interfata de vizualizare si testare interactiva (O5) — `streamlit run ui/app.py`;
+      perturbari live cu valori arbitrare, validate cu aceleasi verificari ca in O2
