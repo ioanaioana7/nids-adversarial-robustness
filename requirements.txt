@@ -1,0 +1,30 @@
+# Dependinte — proiect licenta NIDS / robustete adversariala (UNSW-NB15)
+# Versiunile sunt cele cu care au fost produse rezultatele din results/.
+# Instalare: pip install -r requirements.txt
+#
+# ATENTIE la torch: linia de mai jos instaleaza varianta CPU de pe PyPI.
+# Pentru GPU (NVIDIA, CUDA 12.x) instaleaza-l SEPARAT, inainte:
+#     pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+# Antrenarea FT-Transformer dureaza ~18 min pe GPU fata de ~9 h pe CPU.
+# Nu folosi torch >= 2.6 pe Windows: wheel-ul depaseste limita MAX_PATH si
+# instalarea esueaza cu WinError 206.
+
+# --- nucleu: incarcare date, O1, O2, O3, O4 ---
+pandas==3.0.5
+numpy==2.4.6
+scikit-learn==1.9.0
+xgboost==3.4.0
+joblib==1.5.3
+scipy==1.18.0
+
+# --- figuri ---
+matplotlib==3.11.1
+
+# --- interpretabilitate (O1/O4, optional: pipeline-ul continua fara el) ---
+shap==0.52.0
+
+# --- al treilea clasificator, FT-Transformer (optional pentru O1/O2) ---
+torch==2.5.1
+
+# --- interfata interactiva (O5) ---
+streamlit==1.62.0

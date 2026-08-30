@@ -125,43 +125,117 @@ ui/                               # O5: interfata de vizualizare si testare inte
     live_perturbation.py           # perturbare cu parametri arbitrari, pe primitivele O2
 ```
 
-## Cum se rulează (baseline)
+## Cerinte
+
+- **Python 3.12** (dezvoltat si testat pe 3.12.10)
+- **~1,5 GB spatiu** pentru date + modele (`rf_baseline.joblib` singur are 633 MB)
+- **Datele UNSW-NB15** — partitia oficiala train/test, in
+  `Resources/CSV Files/Training and Testing Sets/`. Se descarca de la
+  [research.unsw.edu.au](https://research.unsw.edu.au/projects/unsw-nb15-dataset)
+  (alternativ [Kaggle](https://www.kaggle.com/datasets/mrwellsdavid/unsw-nb15)).
+  Caile sunt configurabile in `src/config.py` (`TRAIN_PATH` / `TEST_PATH`).
+- **GPU NVIDIA — optional**, doar pentru FT-Transformer: 18 min cu GPU fata de ~9 h pe CPU.
+  Restul pipeline-ului nu foloseste GPU.
+
+### Instalare
 
 ```bash
-pip install pandas scikit-learn matplotlib joblib xgboost shap
-python main.py
+pip install -r requirements.txt
 ```
 
-Pentru modulul de perturbare (O2 — foloseste modelele inghetate, nu reantreneaza):
+Pentru GPU (CUDA 12.x), instaleaza `torch` SEPARAT, **inainte** de `requirements.txt`:
 
 ```bash
-python run_perturbation.py
+pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+pip install -r requirements.txt
 ```
 
-Pentru al treilea clasificator (FT-Transformer, PyTorch):
+> **Nu folosi `torch >= 2.6` pe Windows.** Wheel-ul depaseste limita `MAX_PATH` si
+> instalarea esueaza cu `WinError 206`, lasand un pachet corupt fara fisier RECORD
+> (pe care `pip uninstall` nu il mai poate sterge). Versiunea fixata, 2.5.1, se
+> instaleaza curat.
+
+Verifica daca GPU-ul e vazut:
 
 ```bash
-pip install torch --index-url https://download.pytorch.org/whl/cu124   # sau /cpu
-python train_transformer.py
+python -c "import torch; print(torch.cuda.is_available())"
 ```
 
-Antrenarea salveaza checkpoint-uri periodic, deci o intrerupere nu pierde progresul:
-relansarea aceleiasi comenzi continua de unde a ramas. `--fresh` reia de la zero,
-`--eval-only` regenereaza artefactele din modelul deja salvat.
+## Cum se ruleaza
 
-Pentru masurarea evaziunii (O3) si analiza de sensibilitate (O4), in aceasta ordine:
+Etapele depind una de alta, deci ordinea conteaza. Fiecare comanda se ruleaza din
+radacina proiectului.
+
+| # | Comanda | Durata | Necesita | Produce |
+|---|---|---|---|---|
+| 1 | `python main.py` | ~15 min | datele | `models/*.joblib`, metrici, EDA |
+| 2 | `python train_transformer.py` | ~18 min GPU | datele | `models/transformer_baseline.pt` |
+| 3 | `python run_perturbation.py` | ~2 min | pasul 1 | `results/perturbation/` |
+| 4 | `python run_evasion.py` | ~5 min | pasii 1-3 | `results/evasion/` |
+| 5 | `python run_sensitivity.py` | ~8 min | pasii 1-4 | `results/sensitivity/` |
+| 6 | `streamlit run ui/app.py` | interactiv | pasii 1-5 | interfata |
+
+Pasul 2 e optional daca vrei doar arborii; pasii 4-6 il vor sari automat.
+Pasii 3-6 **nu reantreneaza nimic** — incarca modelele inghetate.
+
+### Detalii utile
+
+**Antrenarea Transformer-ului e reluabila.** Checkpoint-uri la fiecare 10 epoci si la
+fiecare imbunatatire, deci o intrerupere costa cel mult cateva epoci:
 
 ```bash
-python run_evasion.py       # ~5 min; necesita O2 rulat
-python run_sensitivity.py   # ~8 min; necesita O2 si O3 rulate
+python train_transformer.py               # antreneaza sau continua de unde a ramas
+python train_transformer.py --fresh       # ignora checkpoint-ul, reia de la zero
+python train_transformer.py --eval-only   # doar artefactele, din modelul deja salvat
+python train_transformer.py --max-epochs 2  # rulare scurta de proba
 ```
 
-Pentru interfata interactiva (O5):
+## Interfata interactiva (O5)
 
 ```bash
-pip install streamlit
 streamlit run ui/app.py
 ```
+
+Se deschide pe `http://localhost:8501`. **Prima incarcare dureaza ~23 s** (cele trei
+modele, dintre care unul de 633 MB); dupa aceea raman in cache si perturbarile se
+aplica instantaneu.
+
+| Tab | Ce face |
+|---|---|
+| **Testare pe grup** | Alegi o clasa de atac si misti controalele; rata de evaziune a celor trei modele se recalculeaza pe loc |
+| **Flux individual** | Un singur flux: ce caracteristici s-au schimbat si cum se muta decizia si probabilitatile fiecarui model |
+| **Rezultate masurate** | Tabelele si figurile din O3/O4 |
+| **De ce cedeaza modelele** | Concentrarea importantei si corelatia din O4 |
+
+Controalele din bara laterala accepta **valori arbitrare**, nu doar cele 28 de variante
+din grila: orice `sttl` intre 16 si 255, orice procent de padding, orice factor de
+temporizare, reducerea contoarelor de conexiuni, plus politica `ct_state_ttl`.
+
+**Demo sugerat pentru sustinere:** lasa clasa pe „(toate)", muta `sttl` de la 254 la 31
+si urmareste cele trei metrici. XGBoost trece de la 0% la peste 50%. Apoi pune `sttl=62`
+si arata ca evaziunea **scade** — pentru ca 62 e o valoare asociata atacurilor, nu
+traficului normal.
+
+**Interfata nu reimplementeaza perturbarea.** `ui/live_perturbation.py` compune exact
+aceleasi primitive validate din O2 (`dependencies.propagate`,
+`dependencies.resolve_ct_state_ttl`, `schema.restore_dtypes`) si trece fiecare varianta
+prin `validators.validate`. Doua consecinte:
+
+- date aceleasi valori ca un nivel din grila, interfata reproduce **exact** varianta
+  corespunzatoare din O2 (verificat pe 7 variante, identice bit cu bit);
+- o combinatie arbitrara care ar incalca o constrangere fizica e semnalata ca invalida,
+  deci nu se poate afisa o „evaziune" obtinuta cu un flux imposibil de produs in realitate.
+
+### Daca ceva nu merge
+
+| Simptom | Cauza / rezolvare |
+|---|---|
+| `FileNotFoundError` pe CSV-uri | Datele UNSW-NB15 lipsesc; vezi *Cerinte* |
+| `lipseste feature_deltas.csv` | Ruleaza `python run_perturbation.py` intai |
+| Interfata spune ca lipsesc rezultatele O3/O4 | Ruleaza `run_evasion.py`, apoi `run_sensitivity.py` |
+| `modelul Transformer lipseste` | Ruleaza `python train_transformer.py`, sau ignora — restul merge fara el |
+| `WinError 206` la instalarea torch | Foloseste `torch==2.5.1`, nu o versiune mai noua |
+| Antrenarea Transformer dureaza ore | Rulezi pe CPU; instaleaza wheel-ul CUDA |
 
 ## Modelul de amenintare (O2)
 
@@ -330,39 +404,8 @@ puse coerent impreuna. Nicio analiza care schimba o caracteristica pe rand nu ar
 detectat asta. Justifica retroactiv decizia centrala din O2: propagarea consistenta a
 caracteristicilor derivate, nu perturbarea lor izolata.
 
-Detalii complete in `docs/o4_sensitivity_analysis.md` (local, `docs/` nu e versionat).
-
-## Interfata interactiva (O5)
-
-```bash
-pip install streamlit
-streamlit run ui/app.py
-```
-
-Modelele inghetate se incarca o singura data (~23 s) si raman in cache; dupa aceea
-perturbarile se aplica live. Patru taburi:
-
-| Tab | Ce face |
-|---|---|
-| **Testare pe grup** | Alegi o clasa de atac si misti controalele; rata de evaziune a celor trei modele se recalculeaza pe loc |
-| **Flux individual** | Un singur flux: ce caracteristici s-au schimbat si cum se muta decizia si probabilitatile fiecarui model |
-| **Rezultate masurate** | Tabelele si figurile din O3/O4 |
-| **De ce cedeaza modelele** | Concentrarea importantei si corelatia din O4 |
-
-Controalele permit **valori arbitrare**, nu doar cele 28 de variante din grila: orice
-`sttl` intre 16 si 255, orice procent de padding, orice factor de temporizare, plus
-politica `ct_state_ttl`.
-
-**Interfata nu reimplementeaza perturbarea.** `ui/live_perturbation.py` compune exact
-aceleasi primitive validate din O2 (`dependencies.propagate`,
-`dependencies.resolve_ct_state_ttl`, `schema.restore_dtypes`) si trece fiecare varianta
-prin `validators.validate`. Doua consecinte:
-
-- date aceleasi valori ca un nivel din grila, interfata reproduce **exact** varianta
-  corespunzatoare din O2 (verificat pe 7 variante: `ttl_hold`, `ttl_mimic`, `padding`,
-  `timing`, `connection_rate`);
-- o combinatie arbitrara care ar incalca o constrangere fizica e semnalata ca invalida,
-  deci nu se poate afisa o "evaziune" obtinuta cu un flux imposibil de produs in realitate.
+Detalii complete in `docs/o4_sensitivity_analysis.md` si `docs/pipeline_complet_O1_O5.md`
+(locale — `docs/` nu e versionat).
 
 ## Predictie determinista (obligatoriu pentru O3)
 
