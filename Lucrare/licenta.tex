@@ -1,0 +1,127 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%% File: thesis.tex, version 1.8, April 2025
+%%%
+%%% =============================================
+%%% This file contains a template that can be used with the package
+%%% cs.sty and LaTeX2e to produce a thesis that meets the requirements
+%%% of the Computer Science Department from the Technical University of Cluj-Napoca
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt,a4paper,twoside]{report}
+
+\usepackage{cs}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[romanian]{babel}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{amsmath,amsbsy}
+\usepackage{amssymb}
+\usepackage[matrix,arrow]{xy}
+\usepackage{ae,aecompl}
+\usepackage{amstext}
+\usepackage{graphics}
+\usepackage{ae,aecompl}
+\usepackage{algorithm}
+\usepackage{color}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+%% decomentati linia urmatoare pentru e nu mai evidenția hiper legăturile pentru imprimare pe hârtie
+%\hypersetup{hidelinks}
+\usepackage{geometry}
+\usepackage{lipsum}
+\usepackage{enumitem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlist{noitemsep,nolistsep}
+
+
+\diplomathesis
+\centerchapter
+\singlespace
+\newenvironment{definition}[1][Definiție.]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+%%% setari pagină
+ \geometry{
+	a4paper,
+	total={159.2mm,246.2mm},
+	left=25.4mm,
+	top=25.4mm,
+}
+
+
+\begin{document}
+\include{foi_de_capat} % Primele 3 pagini
+%%%%%%%%%%%%%%%%% Pagina cu instructiuni de eliminat
+\thispagestyle{empty}
+\include{ghid}
+\newpage
+%%%%%%%%%%%%%%%%%% sf. pagina cu instructini
+\pagestyle{fancy}
+\setlength\headheight{16.0pt}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername~\thechapter.~#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\renewcommand{\headrulewidth}{0.4pt}
+\lhead{}
+\chead{%
+	\leftmark\rightmark
+}
+\chead{}
+\cfoot{\thepage}
+\lfoot{}
+\rfoot{}
+
+%%%%%%%%%%%% Cuprinsul %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+%\listoftables
+%\listoffigures
+
+%%%%%%%%%%%%%%%%%% de aici începe numerotarea paginilor
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+
+\titleformat{\chapter}[hang]
+{\normalfont\Large\bfseries}{\chaptertitlename\ \thechapter.}{1em}{}
+\titleformat{\section}[hang]
+{\normalfont\large\bfseries}{\thesection.}{1em}{}
+\titleformat{\subsection}[hang]
+{\normalfont}{\thesubsection.}{1em}{}
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\titlespacing*{\chapter}{0pt}{30pt}{18pt}
+
+\include{introducere} % \chapter{Introducere}
+
+\include{obiective} % \chapter{Obiectivele Proiectului}
+
+\include{studiu_biblio} % \chapter{Studiu Bibliografic}
+
+\include{analiza_fundamentare} % \chapter{Analiză și Fundamentare Teoretică}
+
+\include{proiectare_implementare} % \chapter{Proiectare de Detaliu și Implementare}
+
+\include{testare_validare} % \chapter{Testare și Validare}
+
+\include{instalare_utilizare} % \chapter{Manual de Instalare și Utilizare}
+
+\include{concluzii} % \chapter{Concluzii}
+
+\bibliographystyle{IEEEtran}
+\bibliography{licenta}%same file name as for .bib
+
+\include{anexe}
+
+\end{document}
