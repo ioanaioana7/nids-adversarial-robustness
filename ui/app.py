@@ -58,34 +58,57 @@ def read_csv(path: Path):
 
 
 def controls():
-    """Controalele din bara laterala."""
-    st.sidebar.subheader("Trafic")
+    """Controalele din bara laterala.
+
+    Sunt intr-un formular: valorile se scriu, iar nimic nu se recalculeaza pana
+    la apasarea butonului. Ce e afisat in dreapta corespunde intotdeauna
+    ultimei rulari, nu campurilor editate intre timp.
+    """
     attacks, _, _ = load_data()
-    attack_class = st.sidebar.selectbox(
-        "Clasa", ["toate"] + sorted(attacks[config.TARGET].unique()))
-    n_flows = st.sidebar.select_slider("Fluxuri", [500, 1000, 2000, 5000], value=2000)
+    classes = ["toate"] + sorted(attacks[config.TARGET].unique())
 
-    st.sidebar.subheader("Modificari")
-    use_ttl = st.sidebar.toggle("TTL sursa", value=True)
-    sttl = st.sidebar.slider("sttl", config.MIN_REALISTIC_TTL, config.MAX_TTL,
-                             config.NORMAL_TTL_TARGET, disabled=not use_ttl,
-                             label_visibility="collapsed")
-    padding = st.sidebar.slider("Payload adaugat", 0, 200, 0, step=10,
-                                format="+%d%%") / 100.0
-    duration = st.sidebar.slider("Durata", 1.0, 10.0, 1.0, step=0.5, format="x%.1f")
-    conn = st.sidebar.slider("Contoare conexiuni", 0.25, 1.0, 1.0, step=0.05, format="x%.2f")
+    with st.sidebar.form("parametri"):
+        st.subheader("Trafic")
+        attack_class = st.selectbox("Clasa", classes)
+        n_flows = st.number_input("Fluxuri", 100, 45000, 2000, step=500)
 
-    with st.sidebar.expander("Avansat"):
-        policy = st.radio("ct_state_ttl", config.CT_STATE_TTL_POLICIES, index=1,
-                          help="Nu poate fi recalculat exact. 'hold' = margine "
-                               "conservatoare, 'mimic' = optimista.")
+        st.subheader("Modificari")
+        use_ttl = st.checkbox("Modifica TTL sursa", value=True)
+        sttl = st.number_input("sttl", config.MIN_REALISTIC_TTL, config.MAX_TTL,
+                               config.NORMAL_TTL_TARGET, step=1)
+        padding = st.number_input("Payload adaugat (%)", 0, 500, 0, step=5)
+        duration = st.number_input("Durata (x)", 1.0, 100.0, 1.0, step=0.5, format="%.1f")
+        conn = st.number_input("Contoare conexiuni (x)", 0.01, 1.0, 1.0,
+                               step=0.05, format="%.2f")
+        policy = st.selectbox("ct_state_ttl", config.CT_STATE_TTL_POLICIES, index=1)
 
-    return {
-        "attack_class": attack_class, "n_flows": n_flows,
-        "params": {"target_sttl": sttl if use_ttl else None, "ct_policy": policy,
-                   "padding_fraction": padding, "duration_factor": duration,
+        submitted = st.form_submit_button("Ruleaza", type="primary",
+                                          use_container_width=True)
+
+    settings = {
+        "attack_class": attack_class, "n_flows": int(n_flows),
+        "params": {"target_sttl": int(sttl) if use_ttl else None, "ct_policy": policy,
+                   "padding_fraction": padding / 100.0, "duration_factor": duration,
                    "connection_rate_scale": conn},
     }
+    if submitted or "settings" not in st.session_state:
+        st.session_state.settings = settings
+    return st.session_state.settings
+
+
+def describe(settings) -> str:
+    """Rezumatul intr-un rand al parametrilor efectiv rulati."""
+    p = settings["params"]
+    parts = [settings["attack_class"], f"{settings['n_flows']} fluxuri"]
+    if p["target_sttl"] is not None:
+        parts.append(f"sttl={p['target_sttl']} ({p['ct_policy']})")
+    if p["padding_fraction"] > 0:
+        parts.append(f"payload +{p['padding_fraction'] * 100:.0f}%")
+    if p["duration_factor"] > 1:
+        parts.append(f"durata x{p['duration_factor']:.1f}")
+    if p["connection_rate_scale"] < 1:
+        parts.append(f"conexiuni x{p['connection_rate_scale']:.2f}")
+    return " · ".join(parts)
 
 
 def measure(models, X, y_true, perturbed):
@@ -219,6 +242,7 @@ def main():
     models = load_models()
     data = load_data()
     settings = controls()
+    st.caption(describe(settings))
 
     result, flow, measurements = st.tabs(["Rezultat", "Un flux", "Masuratori"])
     with result:
