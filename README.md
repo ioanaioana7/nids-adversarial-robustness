@@ -161,6 +161,18 @@ Verifica daca GPU-ul e vazut:
 python -c "import torch; print(torch.cuda.is_available())"
 ```
 
+> **Foloseste `python`, nu `py`.** Daca ai mai multe versiuni de Python instalate,
+> launcher-ul `py` alege implicit versiunea cea mai noua, care poate sa nu fie cea in
+> care ai instalat pachetele. Simptomul e `ModuleNotFoundError: No module named 'numpy'`
+> desi tocmai ai instalat totul. Verifica cu:
+>
+> ```bash
+> py --list                                  # ce versiuni exista
+> python -c "import sys; print(sys.executable)"   # care e folosita efectiv
+> ```
+>
+> Toate comenzile din acest README presupun `python`.
+
 ## Cum se ruleaza
 
 Etapele depind una de alta, deci ordinea conteaza. Fiecare comanda se ruleaza din
@@ -173,7 +185,7 @@ radacina proiectului.
 | 3 | `python run_perturbation.py` | ~2 min | pasul 1 | `results/perturbation/` |
 | 4 | `python run_evasion.py` | ~5 min | pasii 1-3 | `results/evasion/` |
 | 5 | `python run_sensitivity.py` | ~8 min | pasii 1-4 | `results/sensitivity/` |
-| 6 | `streamlit run ui/app.py` | interactiv | pasii 1-5 | interfata |
+| 6 | `python -m streamlit run ui/app.py` | interactiv | pasii 1-5 | interfata |
 
 Pasul 2 e optional daca vrei doar arborii; pasii 4-6 il vor sari automat.
 Pasii 3-6 **nu reantreneaza nimic** — incarca modelele inghetate.
@@ -193,8 +205,14 @@ python train_transformer.py --max-epochs 2  # rulare scurta de proba
 ## Interfata interactiva (O5)
 
 ```bash
-streamlit run ui/app.py
+python -m streamlit run ui/app.py
 ```
+
+Se foloseste `python -m streamlit`, nu `streamlit` direct: pip instaleaza `streamlit.exe`
+intr-un director `Scripts` care de obicei **nu e in PATH** pe Windows, iar comanda scurta
+esueaza cu `'streamlit' is not recognized as an internal or external command`. Forma cu
+`-m` ocoleste complet problema si foloseste exact interpretorul in care ai instalat
+pachetele.
 
 Se deschide pe `http://localhost:8501`. **Prima incarcare dureaza ~23 s** (cele trei
 modele, dintre care unul de 633 MB); dupa aceea raman in cache si perturbarile se
@@ -236,6 +254,8 @@ prin `validators.validate`. Doua consecinte:
 | `modelul Transformer lipseste` | Ruleaza `python train_transformer.py`, sau ignora — restul merge fara el |
 | `WinError 206` la instalarea torch | Foloseste `torch==2.5.1`, nu o versiune mai noua |
 | Antrenarea Transformer dureaza ore | Rulezi pe CPU; instaleaza wheel-ul CUDA |
+| `'streamlit' is not recognized...` | Foloseste `python -m streamlit run ui/app.py` |
+| `ModuleNotFoundError` desi ai instalat pachetele | Rulezi cu alt interpretor (tipic `py` → 3.13 in loc de 3.12). Foloseste `python` |
 
 ## Modelul de amenintare (O2)
 
@@ -474,5 +494,5 @@ acelasi jurnal al rularii.
       raportata ca interval hold..mimic; varianta-identitate da exact 0% evaziune
 - [x] Analiza de sensibilitate (O4) — `python run_sensitivity.py`; importanta prin
       permutare comparabila intre modele, corelata cu evaziunea (Spearman rho 0,83-0,95)
-- [x] Interfata de vizualizare si testare interactiva (O5) — `streamlit run ui/app.py`;
+- [x] Interfata de vizualizare si testare interactiva (O5) — `python -m streamlit run ui/app.py`;
       perturbari live cu valori arbitrare, validate cu aceleasi verificari ca in O2
