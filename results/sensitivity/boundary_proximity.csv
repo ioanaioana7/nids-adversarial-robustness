@@ -1,4 +1,4 @@
 variant,n_evaded,n_not_evaded,mean_p_true_clean_evaded,mean_p_true_clean_not_evaded,confidence_gap,model
 ttl_mimic_L3,8311,36805,0.3593,0.7575,0.3982,RandomForest
 ttl_mimic_L3,22604,21654,0.653,0.8503,0.1973,XGBoost
-ttl_mimic_L3,32663,12639,0.7409,0.6217,-0.1193,Transformer
+ttl_mimic_L3,19549,25755,0.8055,0.6088,-0.1967,Transformer

@@ -4,11 +4,11 @@ Generic,RandomForest,2,sttl,0.0427,10.39
 Generic,RandomForest,3,sloss,0.0307,7.47
 Generic,RandomForest,4,dttl,0.024,5.84
 Generic,RandomForest,5,swin,0.0227,5.52
-Generic,Transformer,1,sttl,1.176,52.31
-Generic,Transformer,2,dttl,0.5907,26.28
-Generic,Transformer,3,proto,0.2867,12.75
-Generic,Transformer,4,state,0.044,1.96
-Generic,Transformer,5,ct_state_ttl,0.032,1.42
+Generic,Transformer,1,sttl,0.7707,33.76
+Generic,Transformer,2,proto,0.7507,32.89
+Generic,Transformer,3,dttl,0.528,23.13
+Generic,Transformer,4,state,0.0427,1.87
+Generic,Transformer,5,dmean,0.04,1.75
 Generic,XGBoost,1,sttl,0.8667,51.34
 Generic,XGBoost,2,sbytes,0.2653,15.72
 Generic,XGBoost,3,service,0.236,13.98

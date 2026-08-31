@@ -38,7 +38,7 @@ sample_id,true_label,transformer_eligible
 280,Exploits,True
 281,Reconnaissance,True
 282,Fuzzers,True
-283,Fuzzers,True
+283,Fuzzers,False
 284,Fuzzers,True
 285,Fuzzers,True
 286,Exploits,True
@@ -537,7 +537,7 @@ sample_id,true_label,transformer_eligible
 779,Fuzzers,True
 780,Exploits,True
 781,Exploits,True
-782,Fuzzers,True
+782,Fuzzers,False
 783,Shellcode,True
 784,Analysis,True
 785,Fuzzers,True
@@ -1239,7 +1239,7 @@ sample_id,true_label,transformer_eligible
 1481,Exploits,True
 1482,DoS,True
 1483,Fuzzers,True
-1484,Fuzzers,True
+1484,Fuzzers,False
 1485,Fuzzers,True
 1486,Exploits,True
 1487,Fuzzers,True
@@ -3686,7 +3686,7 @@ sample_id,true_label,transformer_eligible
 3928,Exploits,True
 3929,Fuzzers,True
 3930,Fuzzers,True
-3931,Fuzzers,True
+3931,Fuzzers,False
 3932,Exploits,True
 3933,Reconnaissance,True
 3934,DoS,True
@@ -5832,7 +5832,7 @@ sample_id,true_label,transformer_eligible
 6074,DoS,True
 6075,Reconnaissance,True
 6076,Reconnaissance,True
-6077,Exploits,True
+6077,Exploits,False
 6078,Exploits,True
 6079,Exploits,True
 6080,Exploits,True
@@ -6714,7 +6714,7 @@ sample_id,true_label,transformer_eligible
 6956,Exploits,True
 6957,DoS,True
 6958,Exploits,True
-6959,Exploits,True
+6959,Exploits,False
 6960,Exploits,True
 6961,Analysis,True
 6962,DoS,True
@@ -7945,10 +7945,10 @@ sample_id,true_label,transformer_eligible
 8187,Exploits,True
 8188,DoS,True
 8189,Exploits,True
-8190,Exploits,True
+8190,Exploits,False
 8191,DoS,True
 8192,Exploits,True
-8193,Exploits,True
+8193,Exploits,False
 8194,Exploits,True
 8195,Exploits,True
 8196,Reconnaissance,True
@@ -8066,7 +8066,7 @@ sample_id,true_label,transformer_eligible
 8308,Exploits,True
 8309,Reconnaissance,True
 8310,DoS,True
-8311,Exploits,False
+8311,Exploits,True
 8312,DoS,True
 8313,Exploits,True
 8314,Exploits,True
@@ -8092,7 +8092,7 @@ sample_id,true_label,transformer_eligible
 8334,Exploits,True
 8335,Exploits,True
 8336,Reconnaissance,True
-8337,Exploits,True
+8337,Exploits,False
 8338,Exploits,True
 8339,Exploits,True
 8340,DoS,True
@@ -10366,7 +10366,7 @@ sample_id,true_label,transformer_eligible
 10608,DoS,True
 10609,Exploits,True
 10610,Exploits,True
-10611,Exploits,True
+10611,Exploits,False
 10612,DoS,True
 10613,Shellcode,True
 10614,DoS,True
@@ -10377,7 +10377,7 @@ sample_id,true_label,transformer_eligible
 10619,Exploits,True
 10620,DoS,True
 10621,Reconnaissance,True
-10622,Exploits,True
+10622,Exploits,False
 10623,Shellcode,True
 10624,Exploits,True
 10625,Exploits,True
@@ -14278,7 +14278,7 @@ sample_id,true_label,transformer_eligible
 14520,Generic,True
 14521,Generic,True
 14522,Generic,True
-14523,Generic,False
+14523,Generic,True
 14524,Generic,True
 14525,Generic,True
 14526,Generic,True
@@ -23641,7 +23641,7 @@ sample_id,true_label,transformer_eligible
 44160,Exploits,True
 44161,Exploits,True
 44162,Fuzzers,True
-44163,Exploits,False
+44163,Exploits,True
 44164,Exploits,True
 44165,Exploits,True
 44166,DoS,True
@@ -24480,7 +24480,7 @@ sample_id,true_label,transformer_eligible
 44999,Fuzzers,True
 45000,DoS,True
 45001,Exploits,True
-45002,Generic,True
+45002,Generic,False
 45003,DoS,True
 45004,Fuzzers,True
 45005,Reconnaissance,True
@@ -27871,7 +27871,7 @@ sample_id,true_label,transformer_eligible
 48390,Fuzzers,True
 48391,Analysis,True
 48392,Shellcode,True
-48393,Exploits,True
+48393,Exploits,False
 48394,Fuzzers,True
 48395,Fuzzers,True
 48396,Reconnaissance,True
@@ -29183,7 +29183,7 @@ sample_id,true_label,transformer_eligible
 49702,Exploits,True
 49703,Generic,True
 49704,DoS,True
-49705,Exploits,False
+49705,Exploits,True
 49706,Fuzzers,True
 49707,Exploits,True
 49708,Exploits,True
@@ -30466,7 +30466,7 @@ sample_id,true_label,transformer_eligible
 50985,Fuzzers,True
 50986,Exploits,True
 50987,Fuzzers,True
-50988,Exploits,True
+50988,Exploits,False
 50989,DoS,True
 50990,Fuzzers,True
 50991,Exploits,True
@@ -32343,7 +32343,7 @@ sample_id,true_label,transformer_eligible
 52862,Exploits,True
 52863,Generic,True
 52864,Generic,True
-52865,Generic,False
+52865,Generic,True
 52866,DoS,True
 52867,Exploits,True
 52868,Generic,True
@@ -38801,7 +38801,7 @@ sample_id,true_label,transformer_eligible
 59320,Generic,True
 59321,Reconnaissance,True
 59322,Generic,True
-59323,Exploits,False
+59323,Exploits,True
 59324,Generic,True
 59325,Generic,True
 59326,Fuzzers,True
@@ -39794,11 +39794,11 @@ sample_id,true_label,transformer_eligible
 60313,Exploits,True
 60314,Generic,True
 60315,Shellcode,True
-60316,Analysis,False
+60316,Analysis,True
 60317,Generic,True
 60318,Generic,True
 60319,Exploits,True
-60320,Analysis,False
+60320,Analysis,True
 60321,Generic,True
 60322,Generic,True
 60323,Generic,True
@@ -39913,7 +39913,7 @@ sample_id,true_label,transformer_eligible
 60432,Exploits,True
 60433,Generic,True
 60434,Fuzzers,True
-60435,Analysis,False
+60435,Analysis,True
 60436,Fuzzers,True
 60437,Exploits,True
 60438,Exploits,True
@@ -40740,7 +40740,7 @@ sample_id,true_label,transformer_eligible
 61259,Exploits,True
 61260,Exploits,True
 61261,Analysis,True
-61262,Exploits,False
+61262,Exploits,True
 61263,Generic,True
 61264,Backdoor,True
 61265,Reconnaissance,True
@@ -40951,7 +40951,7 @@ sample_id,true_label,transformer_eligible
 61470,Exploits,True
 61471,Exploits,True
 61472,Generic,True
-61473,Exploits,True
+61473,Exploits,False
 61474,Generic,True
 61475,Exploits,True
 61476,Generic,True
@@ -42098,7 +42098,7 @@ sample_id,true_label,transformer_eligible
 62617,Generic,True
 62618,Generic,True
 62619,Generic,True
-62620,Exploits,False
+62620,Exploits,True
 62621,Generic,True
 62622,Generic,True
 62623,Reconnaissance,True
@@ -42234,7 +42234,7 @@ sample_id,true_label,transformer_eligible
 62753,Generic,True
 62754,Generic,True
 62755,Generic,True
-62756,DoS,True
+62756,DoS,False
 62757,Fuzzers,True
 62758,Exploits,True
 62759,Generic,True
@@ -42594,7 +42594,7 @@ sample_id,true_label,transformer_eligible
 63113,Reconnaissance,True
 63114,Reconnaissance,True
 63115,Exploits,True
-63116,Analysis,False
+63116,Analysis,True
 63117,Exploits,True
 63118,Generic,True
 63119,Reconnaissance,True
@@ -44127,7 +44127,7 @@ sample_id,true_label,transformer_eligible
 64646,Fuzzers,True
 64647,Generic,True
 64648,Fuzzers,True
-64649,Analysis,False
+64649,Analysis,True
 64650,Generic,True
 64651,Fuzzers,True
 64652,Generic,True
@@ -45127,7 +45127,7 @@ sample_id,true_label,transformer_eligible
 65646,Generic,True
 65647,Reconnaissance,True
 65648,Generic,True
-65649,Analysis,False
+65649,Analysis,True
 65650,Generic,True
 65651,Analysis,True
 65652,Analysis,True
@@ -45259,8 +45259,8 @@ sample_id,true_label,transformer_eligible
 65778,Generic,True
 65779,Generic,True
 65780,DoS,True
-65781,Exploits,False
-65782,Exploits,False
+65781,Exploits,True
+65782,Exploits,True
 65783,Exploits,True
 65784,Exploits,True
 65785,Exploits,True
@@ -45269,8 +45269,8 @@ sample_id,true_label,transformer_eligible
 65788,Generic,True
 65789,Exploits,True
 65790,Exploits,True
-65791,Exploits,False
-65792,Exploits,False
+65791,Exploits,True
+65792,Exploits,True
 65793,Fuzzers,True
 65794,Exploits,True
 65795,Generic,True

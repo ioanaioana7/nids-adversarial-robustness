@@ -110,7 +110,7 @@ def evaluate_split(model: nn.Module, loader: DataLoader, device: torch.device) -
 
 
 def save_checkpoint(path, epoch: int, model: nn.Module, optimizer, train_loader: DataLoader,
-                    best_f1: float, best_epoch: int, best_state: dict, history: list) -> None:
+                    best_score: float, best_epoch: int, best_state: dict, history: list) -> None:
     """Salveaza starea completa de antrenare, ca reluarea sa fie bit-exacta.
 
     Include starile RNG (Python/NumPy/torch) si starea generatorului DataLoader-ului,
@@ -121,7 +121,7 @@ def save_checkpoint(path, epoch: int, model: nn.Module, optimizer, train_loader:
         "epoch": epoch,
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
-        "best_val_macro_f1": best_f1,
+        "best_score_smoothed": best_score,
         "best_epoch": best_epoch,
         "best_state_dict": best_state,
         "history": history,
@@ -145,7 +145,7 @@ def load_checkpoint(path, model: nn.Module, optimizer, train_loader: DataLoader,
     fiecaruia e separata. La schimbarea dispozitivului se avertizeaza explicit.
 
     Returns:
-        tuple: (epoca urmatoare, best_f1, best_epoch, best_state, history).
+        tuple: (epoca urmatoare, best_score netezit, best_epoch, best_state, history).
     """
     state = torch.load(path, map_location=device, weights_only=False)
     model.load_state_dict(state["model_state_dict"])
@@ -165,7 +165,7 @@ def load_checkpoint(path, model: nn.Module, optimizer, train_loader: DataLoader,
         torch.cuda.set_rng_state_all(rng["cuda"])
     train_loader.generator.set_state(rng["loader"])
 
-    return (state["epoch"] + 1, state["best_val_macro_f1"], state["best_epoch"],
+    return (state["epoch"] + 1, state["best_score_smoothed"], state["best_epoch"],
             state["best_state_dict"], state["history"])
 
 
@@ -184,7 +184,8 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader,
           patience: int = config.TRANSFORMER_EARLY_STOPPING_PATIENCE,
           checkpoint_path=config.TRANSFORMER_CHECKPOINT_PATH,
           checkpoint_every: int = config.TRANSFORMER_CHECKPOINT_EVERY,
-          resume: bool = True) -> tuple[dict, list]:
+          resume: bool = True,
+          window: int = config.TRANSFORMER_SELECTION_WINDOW) -> tuple[dict, list]:
     """Antreneaza cu early stopping pe macro-F1 de validare, cu checkpointing.
 
     Macro-F1 (nu acuratetea) e criteriul, pentru ca setul e puternic dezechilibrat:
@@ -215,12 +216,12 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader,
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.TRANSFORMER_LR,
                                   weight_decay=config.TRANSFORMER_WEIGHT_DECAY)
 
-    start_epoch, best_f1, best_epoch, best_state, history = 1, -1.0, -1, None, []
+    start_epoch, best_score, best_epoch, best_state, history = 1, -1.0, -1, None, []
     if resume and checkpoint_path is not None and Path(checkpoint_path).exists():
-        start_epoch, best_f1, best_epoch, best_state, history = load_checkpoint(
+        start_epoch, best_score, best_epoch, best_state, history = load_checkpoint(
             checkpoint_path, model, optimizer, train_loader, device, logger)
         logger.info(f"  [reluare] checkpoint gasit: continui de la epoca {start_epoch} "
-                    f"(cel mai bun pana acum: epoca {best_epoch}, val_macroF1={best_f1:.4f})")
+                    f"(cel mai bun pana acum: epoca {best_epoch}, scor netezit={best_score:.4f})")
 
     if start_epoch > max_epochs:
         logger.info(f"  antrenarea era deja completa ({start_epoch - 1}/{max_epochs} epoci)")
@@ -246,30 +247,40 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader,
         history.append({"epoch": epoch, "train_loss": total_loss / max(n_batches, 1),
                         "val_macro_f1": val_f1, "seconds": elapsed})
 
-        improved = val_f1 > best_f1
+        # Scorul de decizie e media mobila a ultimelor `window` epoci, nu valoarea
+        # epocii curente: o singura epoca norocoasa nu mai poate nici sa fie salvata
+        # ca model final, nici sa opreasca antrenarea.
+        recent = [h["val_macro_f1"] for h in history[-window:]]
+        smoothed = float(np.mean(recent))
+        history[-1]["val_macro_f1_smoothed"] = smoothed
+
+        improved = smoothed > best_score
         if improved:
-            best_f1, best_epoch = val_f1, epoch
+            best_score, best_epoch = smoothed, epoch
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
 
         eta = _format_eta(float(np.mean(epoch_times[-5:])) * (max_epochs - epoch))
         logger.info(f"  epoca {epoch:>3}/{max_epochs}  loss={total_loss / max(n_batches, 1):.4f}  "
-                    f"val_macroF1={val_f1:.4f}  {elapsed:.0f}s  ETA<={eta}"
+                    f"val_macroF1={val_f1:.4f}  netezit={smoothed:.4f}  {elapsed:.0f}s  ETA<={eta}"
                     f"{'  <-- cel mai bun' if improved else ''}")
 
         if checkpoint_path is not None and (improved or epoch % checkpoint_every == 0):
             save_checkpoint(checkpoint_path, epoch, model, optimizer, train_loader,
-                            best_f1, best_epoch, best_state, history)
+                            best_score, best_epoch, best_state, history)
 
         if epoch - best_epoch >= patience:
             logger.info(f"  early stopping: fara imbunatatire de {patience} epoci "
-                        f"(cel mai bun: epoca {best_epoch}, val_macroF1={best_f1:.4f})")
+                        f"(cel mai bun: epoca {best_epoch}, scor netezit={best_score:.4f})")
             break
 
     if best_state is None:
         raise RuntimeError("nicio epoca antrenata si niciun checkpoint valid gasit")
 
     model.load_state_dict(best_state)
-    logger.info(f"  restaurat checkpoint-ul de la epoca {best_epoch} (val_macroF1={best_f1:.4f})")
-    return {"best_epoch": best_epoch, "best_val_macro_f1": best_f1,
+    best_raw = next((h["val_macro_f1"] for h in history if h["epoch"] == best_epoch), float("nan"))
+    logger.info(f"  restaurat checkpoint-ul de la epoca {best_epoch} "
+                f"(scor netezit={best_score:.4f}, val_macroF1 brut={best_raw:.4f})")
+    return {"best_epoch": best_epoch, "best_val_macro_f1_smoothed": best_score,
+            "best_val_macro_f1_raw": best_raw, "selection_window": window,
             "epochs_run": len(history),
             "total_training_seconds": float(sum(epoch_times))}, history

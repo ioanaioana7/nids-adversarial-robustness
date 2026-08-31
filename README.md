@@ -344,7 +344,7 @@ realizabila.
 `python run_evasion.py` (~5 min) masoara, pentru fiecare (model, tip, nivel), ce se
 intampla cu cele 45.332 de fluxuri de atac. Totul se raporteaza la fluxurile
 **eligibile** — cele pe care modelul le-a semnalat ca malitioase pe traficul curat
-(RF 45.116, XGBoost 44.258, Transformer 45.302). Un flux pe care modelul nu l-a prins
+(RF 45.116, XGBoost 44.258, Transformer 45.304). Un flux pe care modelul nu l-a prins
 niciodata nu poate "evada"; includerea lui ar transforma esecuri preexistente ale
 modelului in succese ale atacatorului.
 
@@ -357,7 +357,7 @@ exact 0,00% pentru toate cele trei modele — prin definitia setului eligibil.
 |---|---|---|---|---|---|
 | Random Forest | 4,4 – 18,4% | 31,3 – 75,9% | 0,1% | 0,7% | 0,3% |
 | XGBoost | **50,2 – 51,1%** | **96,4 – 96,9%** | 1,2% | 1,1% | 0,3% |
-| FT-Transformer | 10,7 – 72,1% | 30,8 – 76,6% | 0,1% | 0,0% | 0,0% |
+| FT-Transformer | 4,0 – 43,2% | 17,4 – 71,0% | 0,1% | 0,0% | 0,0% |
 
 Intervalele sunt marginile `hold`..`mimic` explicate mai sus. Cifrele nu includ
 `ttl_both`, varianta nerealizabila.
@@ -398,7 +398,7 @@ exact marimea complementara evaziunii, deci cele doua sunt comensurabile.
 |---|---|---|---|
 | Random Forest | `sttl` | 19,8% | 53,5% |
 | XGBoost | `sttl` | **54,6%** | **84,0%** |
-| FT-Transformer | `dttl` | 50,5% | 37,3% |
+| FT-Transformer | `dttl` | 57,0% | 26,0% |
 
 Tabelul explica rezultatele din O3. XGBoost concentreaza peste jumatate din capacitatea
 de detectie intr-o singura caracteristica pe care atacatorul o schimba cu un apel
@@ -418,11 +418,11 @@ Forest, `Analysis` la XGBoost, `DoS` la Transformer. Nu e intamplator: `Analysis
 regiunea in care modelul nu are un angajament ferm.
 
 **Atributia pe o singura caracteristica subestimeaza vulnerabilitatea.** Pe clasa
-`Generic`, detectia Transformer-ului scade de la 100% la 98,8% cu un `sttl` aleator si
-la 95,8% cu `sttl=31` singur — dar la **2,7%** cand `sttl=31` si `ct_state_ttl=0` sunt
-puse coerent impreuna. Nicio analiza care schimba o caracteristica pe rand nu ar fi
-detectat asta. Justifica retroactiv decizia centrala din O2: propagarea consistenta a
-caracteristicilor derivate, nu perturbarea lor izolata.
+`Generic`, substituirea unei singure caracteristici (chiar si a celei dominante) misca
+detectia cu cel mult cateva puncte, in timp ce perturbarea coerenta din O2 — `sttl` si
+`ct_state_ttl` schimbate impreuna, consistent — o prabuseste. Nicio analiza care schimba
+o caracteristica pe rand nu ar fi detectat asta. Justifica retroactiv decizia centrala
+din O2: propagarea consistenta a caracteristicilor derivate, nu perturbarea lor izolata.
 
 Detalii complete in `docs/o4_sensitivity_analysis.md` si `docs/pipeline_complet_O1_O5.md`
 (locale — `docs/` nu e versionat).
@@ -459,7 +459,14 @@ cu aceeasi ordine a claselor), deci O3 nu are nevoie de ramificatii per model.
 |---|---|---|---|---|
 | Random Forest | 0.6913 | 0.5944 | 0.5010 | 0.7416 |
 | XGBoost | 0.7659 | 0.5443 | **0.5098** | **0.7816** |
-| FT-Transformer | 0.6654 | **0.6038** | 0.4538 | 0.7209 |
+| FT-Transformer | 0.6594 | **0.6288** | 0.4354 | 0.7168 |
+
+Selectia checkpoint-ului se face pe media mobila a macro-F1-ului de validare pe 3
+epoci, nu pe valoarea unei singure epoci: prima rulare salvase o epoca aflata la 2,3
+abateri standard peste media locala, adica zgomot. Corectia nu a imbunatatit macro-F1
+pe test (0,4538 -> 0,4354, diferenta sub zgomotul de 0,030 dintre epoci), dar a dat un
+model mai robust (evaziune TTL 4,0-43,2% fata de 10,7-72,1%) si o procedura de selectie
+defensabila.
 
 Arborii raman rezultatul principal: pe date tabelare, ansamblurile de arbori sunt
 frecvent competitive sau mai bune decat retelele (Grinsztajn et al., 2022), iar

@@ -1,5 +1,5 @@
 {
-  "measured_at": "2026-08-25T15:33:37.390385+00:00",
+  "measured_at": "2026-08-31T10:56:20.614012+00:00",
   "attack_rows": 45332,
   "variants": 28,
   "models": [
@@ -10,7 +10,7 @@
   "eligible": {
     "RandomForest": 45116,
     "XGBoost": 44258,
-    "Transformer": 45302
+    "Transformer": 45304
   },
   "identity_invariant": {
     "RandomForest": {
@@ -23,7 +23,7 @@
     },
     "Transformer": {
       "evasion_rate": 0.0,
-      "n_eligible": 45302
+      "n_eligible": 45304
     }
   },
   "per_row_files": {
@@ -32,7 +32,7 @@
       "path": "outcomes_randomforest.csv.gz"
     },
     "Transformer": {
-      "rows": 1268456,
+      "rows": 1268512,
       "path": "outcomes_transformer.csv.gz"
     },
     "XGBoost": {

@@ -1,5 +1,5 @@
 {
-  "analysed_at": "2026-08-27T12:40:30.329592+00:00",
+  "analysed_at": "2026-08-31T11:08:27.265382+00:00",
   "sample_size": 14999,
   "n_repeats": 5,
   "focus_variant": "ttl_mimic_L3",
@@ -16,9 +16,9 @@
     {
       "model": "Transformer",
       "n_variants": 26,
-      "spearman_importance_mass": 0.801,
+      "spearman_importance_mass": 0.7947,
       "pvalue_importance_mass": 1e-06,
-      "spearman_importance_mass_weighted": 0.8252,
+      "spearman_importance_mass_weighted": 0.8301,
       "pvalue_importance_mass_weighted": 0.0
     },
     {
@@ -41,11 +41,11 @@
     },
     {
       "model": "Transformer",
-      "total_detection_drop": 11.8092,
-      "perturbable_share_pct": 37.28,
+      "total_detection_drop": 8.8884,
+      "perturbable_share_pct": 25.97,
       "top_feature": "dttl",
-      "top_feature_drop": 5.9675,
-      "top_feature_share_pct": 50.53
+      "top_feature_drop": 5.0642,
+      "top_feature_share_pct": 56.98
     },
     {
       "model": "XGBoost",

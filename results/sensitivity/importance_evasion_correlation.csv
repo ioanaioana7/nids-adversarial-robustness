@@ -1,4 +1,4 @@
 model,n_variants,spearman_importance_mass,pvalue_importance_mass,spearman_importance_mass_weighted,pvalue_importance_mass_weighted
 RandomForest,26,0.9182,0.0,0.9536,0.0
-Transformer,26,0.801,1e-06,0.8252,0.0
+Transformer,26,0.7947,1e-06,0.8301,0.0
 XGBoost,26,0.8795,0.0,0.8816,0.0

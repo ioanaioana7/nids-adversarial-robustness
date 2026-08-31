@@ -90,6 +90,17 @@ TRANSFORMER_BATCH_SIZE = 512
 TRANSFORMER_EVAL_BATCH_SIZE = 2048
 TRANSFORMER_MAX_EPOCHS = 100
 TRANSFORMER_EARLY_STOPPING_PATIENCE = 10
+# Selectia checkpoint-ului si early stopping-ul se fac pe o MEDIE MOBILA a
+# macro-F1-ului de validare, nu pe valoarea unei singure epoci.
+#
+# Motiv, masurat pe prima rulare: epoca 24 a dat 0,5740 in timp ce vecinele ei
+# dadeau 0,5192 si 0,4877 — o valoare la 2,3 abateri standard peste media locala
+# (0,5273 ± 0,0206), adica zgomot, nu progres real. Acel varf a facut doua rele
+# deodata: a fost salvat ca model final (de aici o buna parte din diferenta
+# 0,574 validare -> 0,454 test) si a pornit numaratoarea de rabdare, oprind
+# antrenarea la epoca 34 desi curba inca urca (epocile 28-34 aveau media 0,542
+# fata de 0,514 la epocile 11-17).
+TRANSFORMER_SELECTION_WINDOW = 3
 TRANSFORMER_GRAD_CLIP_NORM = 1.0
 
 # Determinism: 0 workers evita nedeterminismul de multiprocessing pe Windows.
