@@ -1,24 +1,138 @@
 \chapter{Obiectivele proiectului}\label{ch:obiective}
+
 \pagestyle{fancy}
 
-Sistemele de detecție a intruziunilor bazate pe învățare automată obțin, pe seturile de date de referință, rate de detecție ridicate atunci când sunt evaluate pe trafic provenit din aceeași distribuție cu cea folosită la antrenare. Această performanță nu garantează însă că sistemul rămâne robust atunci când traficul malițios este modificat în mod deliberat. Un atacator care dorește să evite detecția nu are niciun motiv să transmită atacul în forma sa „canonică”; dimpotrivă, el poate ajusta caracteristici ale traficului --- la nivel de flux sau de pachet --- astfel încât atacul să își păstreze funcționalitatea, dar să nu mai corespundă tiparelor pe care modelul le-a învățat ca fiind malițioase. Distanța dintre performanța raportată în condiții ideale și comportamentul real al sistemului în fața unor astfel de modificări constituie problema centrală abordată de această lucrare.
+Sistemele de detecție a intruziunilor bazate pe învățare automată pot obține rate ridicate de detecție atunci când sunt evaluate pe trafic provenit din aceeași distribuție ca datele utilizate la antrenare. O astfel de performanță nu garantează însă menținerea eficienței în situația în care traficul malițios este modificat în mod deliberat. Un atacator care urmărește evitarea detecției poate modifica anumite proprietăți ale traficului, la nivel de flux sau de pachet, astfel încât atacul să își păstreze funcționalitatea, dar să nu mai corespundă tiparelor pe care modelul le-a asociat cu activitatea malițioasă. Diferența dintre performanța obținută pe trafic nemodificat și comportamentul sistemului în prezența unor astfel de perturbări reprezintă problema centrală analizată în această lucrare.
 
-Tema propusă se formulează astfel: dat fiind un model de clasificare a traficului de rețea, antrenat să distingă traficul normal de mai multe tipuri de atac, se urmărește evaluarea empirică a rezistenței acestui model la variante ușor modificate ale traficului malițios. Lucrarea nu își propune construirea celui mai performant clasificator posibil, ci analiza sistematică a modului în care modificări controlate ale traficului influențează decizia unui clasificator rezonabil de bun, reprezentativ pentru soluțiile utilizate în practică. Din acest motiv, accentul cade nu pe acuratețea de detecție în sine, ci pe fragilitatea acesteia în fața perturbațiilor.
+Tema proiectului pornește de la mai multe modele de clasificare a traficului de rețea, antrenate să distingă traficul normal de diferite categorii de atac. Scopul principal este evaluarea empirică a robusteții acestor modele în fața unor variante perturbate ale traficului malițios. Lucrarea nu urmărește obținerea celui mai performant clasificator posibil, ci analizarea modului în care modificări controlate ale traficului influențează decizia unor clasificatoare suficient de performante pentru a constitui repere experimentale relevante. În consecință, accentul este pus mai puțin pe performanța de clasificare în condiții obișnuite și mai mult pe modul în care aceasta se modifică în condiții adversariale.
 
-Cadrul de lucru presupune un model de amenințare (\textit{threat model}) în care atacatorul poate modifica traficul malițios generat, dar operează sub o constrângere esențială: modificările trebuie să păstreze validitatea și funcționalitatea atacului. O perturbare care ar transforma un atac într-un pachet nefuncțional nu prezintă interes practic. Prin urmare, transformările considerate se limitează la ajustări plauzibile --- de exemplu modificarea câmpului \textit{Time-to-Live} (TTL), adăugarea de octeți de umplutură (\textit{padding}) sau alterarea temporizării --- care schimbă valorile caracteristicilor extrase din trafic fără a compromite scopul atacului. Această constrângere de validitate delimitează exact domeniul temei și o diferențiază de generarea de exemple adversariale pur matematice, în care perturbarea se aplică direct în spațiul caracteristicilor, fără garanția că traficul rezultat ar putea exista într-o rețea reală.
+Evaluarea este realizată în cadrul unui model de amenințare (\textit{threat model}) definit prin trei elemente principale: capabilitatea atacatorului asupra traficului, nivelul său de acces la sistemul de detecție și condițiile de validitate pe care perturbările trebuie să le respecte.
 
-Pe baza acestei formulări, lucrarea urmărește următoarele obiective:
+Capabilitatea atacatorului este limitată la pachetele emise de propria mașină, în acord cu scenariile în care modificările sunt aplicate direct asupra traficului transmis \cite{tan2022sneaking}. Caracteristicile determinate de răspunsurile victimei, precum valoarea TTL a pachetelor de retur, numărul acestora sau volumul de octeți primiți, nu pot fi stabilite direct de atacator. Acestea se pot modifica numai indirect, ca efect al unei acțiuni exercitate asupra traficului propriu, de exemplu prin modificarea duratei fluxului. În mod similar, caracteristicile care definesc identitatea sau natura atacului, precum protocolul, serviciul sau starea conexiunii, sunt menținute neschimbate, deoarece alterarea lor ar putea conduce la un scenariu diferit de atac, nu la o variantă perturbată a aceluiași trafic malițios. Această delimitare este importantă pentru interpretarea rezultatelor, întrucât o parte dintre caracteristicile utilizate de clasificator se află, prin construcție, în afara controlului direct al atacatorului.
 
-\begin{description}
-	\item[Obiectivul 1 --- Antrenarea unui clasificator multi-clasă de referință.] Se urmărește construirea unui model de clasificare capabil să distingă traficul normal de mai multe tipuri de atac, pe baza unui set de date public de detecție a intruziunilor. Modelul trebuie să atingă o performanță comparabilă cu cea raportată în literatură, astfel încât să constituie o bază credibilă pentru experimentele ulterioare. Evaluarea acestui model se realizează cu metrici adecvate cadrului multi-clasă dezechilibrat (precizie, \textit{recall} și scor F1 per clasă, precum și matrice de confuzie), nu doar prin acuratețe globală.
+În ceea ce privește accesul la sistemul de detecție, se presupune că atacatorul nu dispune de parametrii interni ai modelului, de informația de gradient, de scorurile de încredere asociate predicțiilor și nici de o interfață prin care să poată interoga clasificatorul. Perturbările sunt construite independent de reacția modelului, pe baza proprietăților traficului și a transformărilor considerate realizabile, ceea ce permite aplicarea acelorași variante tuturor clasificatoarelor evaluate. În consecință, metodele care exploatează informația de gradient, precum FGSM \cite{goodfellow2015explaining}, se situează în afara modelului de amenințare adoptat în această lucrare, deoarece presupun un nivel de acces la model care nu este acordat atacatorului în cadrul experimental considerat.
 
-	\item[Obiectivul 2 --- Proiectarea unui modul de generare a variantelor perturbate.] Se urmărește implementarea unui mecanism care, pornind de la traficul malițios clasificat corect de model, produce variante ușor modificate ale acestuia. Modulul trebuie să permită aplicarea unor transformări de tipuri diferite (de exemplu TTL, \textit{padding}, temporizare) și pe niveluri de intensitate diferite (modificări minore, medii și accentuate), respectând constrângerea de validitate a atacului.
+A treia componentă a modelului de amenințare privește păstrarea validității și a funcționalității atacului. O perturbare care împiedică traficul malițios să își îndeplinească scopul nu este relevantă pentru evaluarea practică a evaziunii. Din acest motiv, sunt analizate transformări care au o corespondență plauzibilă la nivelul traficului, precum ajustarea câmpului \textit{Time-to-Live} (TTL) \cite{gont2011rfc6274}, adăugarea de octeți de umplutură (\textit{padding}) \cite{okada2025xai} și modificarea temporizării pachetelor \cite{sharon2022tantra}. Aplicarea acestor transformări este constrânsă astfel încât să nu compromită funcționalitatea traficului malițios. Această condiție delimitează domeniul studiului și îl diferențiază de abordările în care exemplele adversariale sunt generate exclusiv prin modificarea numerică a vectorului de caracteristici, fără verificarea existenței unui corespondent realizabil la nivelul traficului de rețea.
 
-	\item[Obiectivul 3 --- Măsurarea ratei de evaziune.] Se urmărește determinarea proporției variantelor perturbate care reușesc să treacă nedetectate, adică să nu mai fie recunoscute drept atacuri de către model. Această măsurătoare se realizează defalcat pe tipuri de transformare și pe niveluri de intensitate, pentru a permite compararea impactului lor.
+Lucrarea urmărește următoarele obiective.
 
-	\item[Obiectivul 4 --- Analiza sensibilității modelului.] Se urmărește identificarea tipurilor de modificări care influențează cel mai mult decizia modelului. Prin corelarea ratei de evaziune cu importanța caracteristicilor afectate de fiecare transformare, se urmărește înțelegerea motivelor pentru care anumite perturbări sunt mai eficiente decât altele. Într-un cadru multi-clasă, analiza distinge trei rezultate posibile pentru o variantă perturbată: menținerea clasificării corecte, clasificarea ca trafic normal (evaziune propriu-zisă) și clasificarea ca un alt tip de atac. Această din urmă situație oferă informații despre fragilitatea granițelor de decizie dintre clasele de atac.
+\begin{description}[style=nextline]
 
-	\item[Obiectivul 5 --- Dezvoltarea unei interfețe de vizualizare și testare.] Se urmărește realizarea unei interfețe simple prin care rezultatele detecției să poată fi vizualizate și prin care să se poată testa interactiv diferite niveluri de modificare a datelor. Interfața are rolul de a face rezultatele accesibile și de a permite explorarea sensibilității modelului fără a necesita intervenția directă în cod.
+\item[Obiectivul 1. Obținerea unui sistem capabil să recunoască mai multe categorii de atac.]
+Proiectul pornește de la construirea unor clasificatoare care disting traficul normal de mai
+multe tipuri de atac, pe baza unui set de date public destinat detecției intruziunilor. Aceste
+modele constituie referința față de care se raportează toate rezultatele ulterioare.
+\begin{itemize}
+    \item Sunt utilizate două ansambluri de arbori de decizie, Random Forest
+    și XGBoost, frecvent întâlnite în literatură pentru date de trafic tabulare.
+    \item Modelele trebuie să atingă o performanță comparabilă cu rezultatele raportate în
+    literatura de specialitate, astfel încât să constituie o bază credibilă pentru experimente.
+    \item Evaluarea folosește metrici potrivite pentru un cadru multi-clasă dezechilibrat,
+    precum precizia, \textit{recall} și scorul F1 pentru fiecare clasă, împreună cu matricea
+    de confuzie. Acuratețea globală nu este utilizată ca unic indicator.
+\end{itemize}
+
+\item[Obiectivul 2. Determinarea măsurii în care modul de construcție a deciziei influențează detecția.]
+Al doilea obiectiv este de a stabili dacă două familii de modele care ajung la decizie pe căi
+diferite se comportă diferit și sub perturbare. Pentru aceasta, alături de ansamblurile de arbori
+este evaluată o arhitectură de tip Transformer adaptată datelor tabulare la nivel de flux.
+\begin{itemize}
+    \item Comparația vizează atât performanța pe trafic nemodificat, cât și comportamentul în
+    prezența perturbărilor evaluate.
+    \item Se urmărește distingerea între robustețea determinată de modul în care modelul
+    utilizează caracteristicile și robustețea aparentă, rezultată din dependența de
+    caracteristici aflate în afara controlului atacatorului.
+    \item Toate cele trei modele sunt supuse aceleiași proceduri de evaluare și acelorași
+    variante perturbate, astfel încât rezultatele să poată fi comparate direct.
+\end{itemize}
+
+\item[Obiectivul 3. Obținerea unor variante de trafic malițios modificate, dar rămase funcționale.]
+Pentru a putea măsura evaziunea este necesar un mecanism care produce, pornind de la fluxuri de
+atac reale, variante ușor modificate ale acestora, fără a le compromite scopul.
+\begin{itemize}
+    \item Punctul de plecare îl constituie fluxurile malițioase pentru care modelul a declanșat
+    o alarmă pe traficul nemodificat, indiferent dacă tipul de atac a fost identificat corect.
+    Un flux încadrat într-o categorie greșită declanșează totuși detecția, astfel încât evaziunea
+    corespunde trecerii unui flux inițial semnalat în clasa traficului normal. Lucrarea distinge,
+    prin urmare, între semnalarea atacului și acuratețea identificării subtipului acestuia.
+    \item Fluxurile pe care modelul nu le semnalează nici pe traficul nemodificat sunt excluse,
+    deoarece includerea lor ar transforma erori preexistente ale modelului în succese atribuite
+    atacatorului.
+    \item Mecanismul permite mai multe tipuri de transformări, precum modificarea TTL, adăugarea
+    de \textit{padding} sau ajustarea temporizării.
+    \item Fiecare transformare este aplicată la mai multe niveluri de intensitate, de la
+    modificări minore până la modificări accentuate, cu condiția ca atacul rezultat să rămână
+    valid și funcțional.
+\end{itemize}
+
+\item[Obiectivul 4. Determinarea proporției de atacuri care scapă nedetectate.]
+Rezultatul central al lucrării este proporția variantelor perturbate care reușesc să evite
+detecția, respectiv care nu mai sunt recunoscute drept atacuri de către model.
+\begin{itemize}
+    \item Rata de evaziune este analizată separat pentru fiecare tip de transformare și pentru
+    fiecare nivel de intensitate, astfel încât să poată fi observat impactul diferitelor
+    modificări asupra performanței modelului.
+    \item Acolo unde o caracteristică afectată de transformare nu poate fi reconstituită din
+    înregistrări de flux izolate, rezultatul este raportat sub forma unui interval delimitat de
+    două politici explicite de tratare a acelei caracteristici, iar nu ca valoare unică. Un
+    asemenea interval nu exprimă incertitudine statistică, ci limitele impuse de ceea ce
+    atacatorul poate realiza efectiv și de ceea ce poate fi determinat din datele disponibile.
+    \item Suplimentar față de perturbările realizabile este evaluat și un scenariu de referință
+    cu constrângeri relaxate, în care se modifică și valoarea TTL a pachetelor de răspuns. Acesta
+    nu reprezintă un atac practic și nu este raportat împreună cu rezultatele realizabile, rolul
+    său fiind de a estima ce parte din dependența modelelor de TTL se sprijină pe informație
+    inaccesibilă atacatorului.
+\end{itemize}
+
+\item[Obiectivul 5. Identificarea modificărilor care influențează cel mai mult decizia de detecție.]
+Dincolo de a măsura cât de des reușește evaziunea, lucrarea urmărește să explice de ce anumite
+perturbări sunt mai eficiente decât altele.
+\begin{itemize}
+    \item Ratele de evaziune sunt puse în corespondență cu caracteristicile afectate de fiecare
+    transformare.
+    \item O variantă perturbată poate avea trei rezultate: poate rămâne clasificată corect, poate
+    fi clasificată drept trafic normal, ceea ce reprezintă evaziunea propriu-zisă, sau poate fi
+    clasificată drept un alt tip de atac. Ultimul caz oferă informații despre modul în care
+    modificările afectează granițele de decizie dintre clasele de atac.
+    \item Se analizează în ce măsură importanța acordată de fiecare model caracteristicilor se
+    suprapune cu mulțimea caracteristicilor pe care atacatorul le poate modifica efectiv.
+\end{itemize}
+
+\item[Obiectivul 6. Reducerea vulnerabilității identificate și măsurarea costului acestei reduceri.]
+Odată vulnerabilitatea măsurată, proiectul urmărește să o reducă și să stabilească ce pierde
+sistemul în schimb. Cele trei clasificatoare sunt reantrenate pe seturi care conțin, pe lângă
+fluxurile originale, variante perturbate ale fluxurilor de atac.
+\begin{itemize}
+    \item Exemplele perturbate se adaugă celor originale, care rămân în setul de antrenare, iar
+    generarea lor folosește exclusiv informație derivată din partiția de antrenare, întrucât
+    perturbările devin în această etapă date de antrenare, nu date de test.
+    \item Adăugarea de exemple malițioase modifică simultan volumul datelor de atac, proporția
+    dintre clase și, dacă ponderile de clasă sunt recalculate, funcția de cost. Din acest motiv
+    experimentul include un grup de control antrenat pe același număr de exemple adăugate, dar
+    nemodificate, iar ponderile de clasă sunt fixate la valorile calculate pe setul original.
+    Rezultatul raportat este diferența față de acest grup de control, nu față de modelul inițial.
+    \item Ratele de evaziune se măsoară pe o mulțime de fluxuri fixată în prealabil, comună
+    tuturor variantelor comparate, deoarece modele diferite semnalează mulțimi diferite de fluxuri
+    pe traficul nemodificat, iar procentele raportate la populații diferite nu sunt comparabile.
+    \item Criteriile de succes, inclusiv pragul minim de îmbunătățire și costul maxim admis pe
+    trafic nemodificat, sunt stabilite înaintea rulării experimentului.
+    \item Evaluarea acoperă o singură rundă a interacțiunii dintre atac și apărare: un atacator
+    care și-ar reoptimiza modificările împotriva modelului reantrenat rămâne în afara cadrului.
+\end{itemize}
+
+\item[Obiectivul 7. Punerea rezultatelor într-o formă explorabilă de către utilizator.]
+Ultimul obiectiv este ca rezultatele să poată fi consultate și verificate fără a fi necesară
+modificarea codului.
+\begin{itemize}
+    \item Interfața permite vizualizarea rezultatelor detecției și testarea interactivă a unor
+    niveluri diferite de modificare a datelor.
+    \item Ea facilitează explorarea rezultatelor și analiza sensibilității modelului direct, fără
+    intervenție în cod.
+\end{itemize}
+
 \end{description}
 
-Îndeplinirea acestor obiective conduce la o evaluare de robustețe a unui sistem de detecție a intruziunilor bazat pe învățare automată, însoțită de un instrument practic de explorare. Rezultatul urmărit nu este o simplă cifră de acuratețe, ci o caracterizare a comportamentului modelului la limita dintre trafic detectat și trafic evaziv: cât de ușor poate fi indus în eroare, prin ce tipuri de modificări, și cu ce consecințe asupra clasificării. Această caracterizare oferă o perspectivă mai realistă asupra utilității unui NIDS bazat pe ML decât o oferă evaluarea clasică pe date nemodificate.
+\medskip
+
+{\emergencystretch=.5em
+Îndeplinirea acestor obiective va permite evaluarea ro\-bus\-te\-ții unui sistem de detecție a intruziunilor bazat pe învățare automată, măsurarea controlată a efectului pe care antrenarea pe trafic perturbat îl are asupra acestei robusteți și, în același timp, va oferi un instrument practic pentru explorarea comportamentului său. Interesul principal nu este obținerea unei singure valori de acuratețe, ci înțelegerea modului în care modelul reacționează atunci când traficul este modificat în limite care păstrează funcționalitatea atacului. Astfel, poate fi analizat cât de ușor poate fi influențată decizia modelului, ce tipuri de modificări sunt cele mai eficiente și dacă acestea duc la clasificarea traficului ca benign sau la confundarea acestuia cu un alt tip de atac. O astfel de evaluare oferă o imagine mai realistă asupra robusteții unui NIDS bazat pe ML decât evaluarea realizată exclusiv pe trafic nemodificat.\par}

@@ -1,0 +1,13 @@
+model,arm,metric,n_seeds,worst_case_mean,worst_case_std,worst_case_min,worst_case_max,worst_variants
+RandomForest,c1,evasion_Generic,3,93.445,0.2383,93.1747,93.6251,combined_mimic_L4
+RandomForest,o1,evasion_Generic,3,90.3697,7.0607,86.1746,98.5215,combined_mimic_L4
+RandomForest,o6,evasion_Generic,3,0.0035,0.0031,0.0,0.0053,"timing_L1,timing_L2,ttl_hold_L1"
+RandomForest,o6_loo,evasion_Generic,1,2.0508,0.0,2.0508,2.0508,combined_mimic_L4
+Transformer,c1,evasion_Generic,3,97.8654,0.1904,97.7046,98.0757,"combined_mimic_L3,combined_mimic_L4"
+Transformer,o1,evasion_Generic,3,97.4448,0.7572,96.8087,98.2824,"combined_mimic_L3,combined_mimic_L4"
+Transformer,o6,evasion_Generic,3,0.3075,0.2763,0.0212,0.5725,"combined_mimic_L3,combined_mimic_L4,ttl_mimic_L3"
+Transformer,o6_loo,evasion_Generic,1,97.8584,0.0,97.8584,97.8584,ttl_mimic_L3
+XGBoost,c1,evasion_Generic,3,100.0,0.0,100.0,100.0,"combined_hold_L4,combined_mimic_L4"
+XGBoost,o1,evasion_Generic,3,100.0,0.0,100.0,100.0,combined_hold_L4
+XGBoost,o6,evasion_Generic,3,0.4544,0.1186,0.3183,0.5357,padding_L1
+XGBoost,o6_loo,evasion_Generic,1,99.9947,0.0,99.9947,99.9947,combined_hold_L3

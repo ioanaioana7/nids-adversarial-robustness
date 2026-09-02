@@ -1,0 +1,188 @@
+\begin{table}[!ht]
+    \caption{Rata de evaziune a modelului Random Forest pe mulțimea comună, pentru toate variantele realizabile. Valorile sunt procente, mediate peste repetări. Grupul O6-LOO are o singură repetare.}
+    \centering\footnotesize
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{Variantă} & \textbf{O1} & \textbf{C1} & \textbf{O6} & \textbf{O6-LOO} \\
+        \hline
+        \texttt{combined\_hold\_L1} & 0,60 & 0,34 & 0,01 & 0,10 \\
+        \hline
+        \texttt{combined\_hold\_L2} & 0,72 & 0,30 & 0,00 & 0,16 \\
+        \hline
+        \texttt{combined\_hold\_L3} & 17,23 & 10,14 & 0,00 & 0,72 \\
+        \hline
+        \texttt{combined\_hold\_L4} & 29,62 & 19,92 & 0,14 & 0,83 \\
+        \hline
+        \texttt{combined\_mimic\_L1} & 6,78 & 5,82 & 0,00 & 1,17 \\
+        \hline
+        \texttt{combined\_mimic\_L2} & 0,72 & 0,31 & 0,00 & 0,16 \\
+        \hline
+        \texttt{combined\_mimic\_L3} & 71,25 & 63,06 & 0,01 & 10,72 \\
+        \hline
+        \texttt{combined\_mimic\_L4} & 80,32 & 75,51 & 0,18 & 11,84 \\
+        \hline
+        \texttt{connection\_rate\_L1} & 0,13 & 0,04 & 0,01 & 0,01 \\
+        \hline
+        \texttt{connection\_rate\_L2} & 0,15 & 0,08 & 0,01 & 0,00 \\
+        \hline
+        \texttt{connection\_rate\_L3} & 0,19 & 0,11 & 0,00 & 0,00 \\
+        \hline
+        \texttt{connection\_rate\_L4} & 0,31 & 0,18 & 0,00 & 0,00 \\
+        \hline
+        \texttt{padding\_L1} & 0,10 & 0,04 & 0,01 & 0,01 \\
+        \hline
+        \texttt{padding\_L2} & 0,07 & 0,01 & 0,01 & 0,00 \\
+        \hline
+        \texttt{padding\_L3} & 0,08 & 0,01 & 0,01 & 0,00 \\
+        \hline
+        \texttt{padding\_L4} & 0,10 & 0,02 & 0,02 & 0,01 \\
+        \hline
+        \texttt{timing\_L1} & 0,19 & 0,07 & 0,03 & 0,02 \\
+        \hline
+        \texttt{timing\_L2} & 0,18 & 0,12 & 0,02 & 0,02 \\
+        \hline
+        \texttt{timing\_L3} & 0,51 & 0,27 & 0,00 & 0,00 \\
+        \hline
+        \texttt{timing\_L4} & 0,66 & 0,28 & 0,10 & 0,00 \\
+        \hline
+        \texttt{ttl\_hold\_L1} & 0,37 & 0,18 & 0,00 & 0,03 \\
+        \hline
+        \texttt{ttl\_hold\_L2} & 0,35 & 0,18 & 0,00 & 0,03 \\
+        \hline
+        \texttt{ttl\_hold\_L3} & 5,37 & 3,06 & 0,00 & 1,65 \\
+        \hline
+        \texttt{ttl\_mimic\_L1} & 3,79 & 3,00 & 0,00 & 1,31 \\
+        \hline
+        \texttt{ttl\_mimic\_L2} & 0,36 & 0,18 & 0,00 & 0,03 \\
+        \hline
+        \texttt{ttl\_mimic\_L3} & 19,60 & 15,12 & 0,01 & 10,88 \\
+        \hline
+    \end{tabular}
+    \label{tab:anexa-o6-rf}
+\end{table}
+
+\begin{table}[!ht]
+    \caption{Rata de evaziune a modelului XGBoost pe mulțimea comună, pentru toate variantele realizabile. Valorile sunt procente, mediate peste repetări. Grupul O6-LOO are o singură repetare.}
+    \centering\footnotesize
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{Variantă} & \textbf{O1} & \textbf{C1} & \textbf{O6} & \textbf{O6-LOO} \\
+        \hline
+        \texttt{combined\_hold\_L1} & 8,75 & 7,14 & 0,04 & 4,61 \\
+        \hline
+        \texttt{combined\_hold\_L2} & 4,46 & 3,68 & 0,00 & 2,77 \\
+        \hline
+        \texttt{combined\_hold\_L3} & 94,72 & 92,79 & 0,00 & 94,02 \\
+        \hline
+        \texttt{combined\_hold\_L4} & 96,09 & 94,73 & 0,00 & 94,49 \\
+        \hline
+        \texttt{combined\_mimic\_L1} & 47,04 & 39,56 & 0,02 & 9,30 \\
+        \hline
+        \texttt{combined\_mimic\_L2} & 4,44 & 3,67 & 0,00 & 2,77 \\
+        \hline
+        \texttt{combined\_mimic\_L3} & 96,26 & 95,43 & 0,00 & 95,43 \\
+        \hline
+        \texttt{combined\_mimic\_L4} & 96,90 & 96,24 & 0,00 & 95,68 \\
+        \hline
+        \texttt{connection\_rate\_L1} & 0,29 & 0,15 & 0,18 & 0,11 \\
+        \hline
+        \texttt{connection\_rate\_L2} & 0,35 & 0,17 & 0,16 & 0,11 \\
+        \hline
+        \texttt{connection\_rate\_L3} & 0,34 & 0,11 & 0,05 & 0,01 \\
+        \hline
+        \texttt{connection\_rate\_L4} & 0,18 & 0,07 & 0,02 & 0,00 \\
+        \hline
+        \texttt{padding\_L1} & 0,91 & 0,88 & 0,46 & 0,14 \\
+        \hline
+        \texttt{padding\_L2} & 0,66 & 1,00 & 0,14 & 0,10 \\
+        \hline
+        \texttt{padding\_L3} & 0,61 & 0,49 & 0,13 & 0,09 \\
+        \hline
+        \texttt{padding\_L4} & 0,92 & 0,88 & 0,12 & 0,10 \\
+        \hline
+        \texttt{timing\_L1} & 0,28 & 0,07 & 0,12 & 0,06 \\
+        \hline
+        \texttt{timing\_L2} & 0,36 & 0,12 & 0,11 & 0,05 \\
+        \hline
+        \texttt{timing\_L3} & 0,64 & 0,28 & 0,02 & 0,01 \\
+        \hline
+        \texttt{timing\_L4} & 0,87 & 0,44 & 0,01 & 0,00 \\
+        \hline
+        \texttt{ttl\_hold\_L1} & 6,47 & 5,73 & 0,00 & 5,95 \\
+        \hline
+        \texttt{ttl\_hold\_L2} & 5,52 & 4,63 & 0,00 & 5,06 \\
+        \hline
+        \texttt{ttl\_hold\_L3} & 49,16 & 48,31 & 0,00 & 90,72 \\
+        \hline
+        \texttt{ttl\_mimic\_L1} & 8,11 & 6,83 & 0,00 & 8,96 \\
+        \hline
+        \texttt{ttl\_mimic\_L2} & 5,51 & 4,62 & 0,00 & 5,05 \\
+        \hline
+        \texttt{ttl\_mimic\_L3} & 49,89 & 49,08 & 0,00 & 92,44 \\
+        \hline
+    \end{tabular}
+    \label{tab:anexa-o6-xgb}
+\end{table}
+
+\begin{table}[!ht]
+    \caption{Rata de evaziune a modelului Transformer pe mulțimea comună, pentru toate variantele realizabile. Valorile sunt procente, mediate peste repetări. Grupul O6-LOO are o singură repetare.}
+    \centering\footnotesize
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{Variantă} & \textbf{O1} & \textbf{C1} & \textbf{O6} & \textbf{O6-LOO} \\
+        \hline
+        \texttt{combined\_hold\_L1} & 3,79 & 8,88 & 0,03 & 4,11 \\
+        \hline
+        \texttt{combined\_hold\_L2} & 4,64 & 12,90 & 0,08 & 6,12 \\
+        \hline
+        \texttt{combined\_hold\_L3} & 8,26 & 27,48 & 0,08 & 11,40 \\
+        \hline
+        \texttt{combined\_hold\_L4} & 15,58 & 44,48 & 0,04 & 17,97 \\
+        \hline
+        \texttt{combined\_mimic\_L1} & 47,86 & 61,96 & 0,09 & 60,91 \\
+        \hline
+        \texttt{combined\_mimic\_L2} & 4,68 & 12,93 & 0,07 & 6,32 \\
+        \hline
+        \texttt{combined\_mimic\_L3} & 65,09 & 69,52 & 0,16 & 69,57 \\
+        \hline
+        \texttt{combined\_mimic\_L4} & 70,92 & 72,52 & 0,09 & 69,65 \\
+        \hline
+        \texttt{connection\_rate\_L1} & 0,01 & 0,00 & 0,00 & 0,02 \\
+        \hline
+        \texttt{connection\_rate\_L2} & 0,01 & 0,00 & 0,00 & 0,00 \\
+        \hline
+        \texttt{connection\_rate\_L3} & 0,00 & 0,00 & 0,00 & 0,00 \\
+        \hline
+        \texttt{connection\_rate\_L4} & 0,00 & 0,00 & 0,00 & 0,00 \\
+        \hline
+        \texttt{padding\_L1} & 0,11 & 0,03 & 0,01 & 0,01 \\
+        \hline
+        \texttt{padding\_L2} & 0,01 & 0,03 & 0,01 & 0,01 \\
+        \hline
+        \texttt{padding\_L3} & 0,01 & 0,03 & 0,01 & 0,05 \\
+        \hline
+        \texttt{padding\_L4} & 0,03 & 0,06 & 0,01 & 0,09 \\
+        \hline
+        \texttt{timing\_L1} & 0,01 & 0,01 & 0,01 & 0,00 \\
+        \hline
+        \texttt{timing\_L2} & 0,02 & 0,01 & 0,01 & 0,01 \\
+        \hline
+        \texttt{timing\_L3} & 0,01 & 0,02 & 0,01 & 0,00 \\
+        \hline
+        \texttt{timing\_L4} & 0,01 & 0,02 & 0,01 & 0,00 \\
+        \hline
+        \texttt{ttl\_hold\_L1} & 2,98 & 6,45 & 0,02 & 3,75 \\
+        \hline
+        \texttt{ttl\_hold\_L2} & 3,02 & 6,69 & 0,02 & 3,77 \\
+        \hline
+        \texttt{ttl\_hold\_L3} & 3,64 & 10,28 & 0,03 & 4,37 \\
+        \hline
+        \texttt{ttl\_mimic\_L1} & 41,39 & 60,07 & 0,05 & 57,54 \\
+        \hline
+        \texttt{ttl\_mimic\_L2} & 3,06 & 6,76 & 0,02 & 3,97 \\
+        \hline
+        \texttt{ttl\_mimic\_L3} & 48,65 & 63,17 & 0,06 & 62,26 \\
+        \hline
+    \end{tabular}
+    \label{tab:anexa-o6-tr}
+\end{table}

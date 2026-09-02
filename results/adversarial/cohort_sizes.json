@@ -1,0 +1,47 @@
+{
+  "RandomForest": {
+    "n": 45001,
+    "pct_of_attacks": 99.27,
+    "per_class": {
+      "Analysis": 674,
+      "Backdoor": 581,
+      "DoS": 4084,
+      "Exploits": 11085,
+      "Fuzzers": 5791,
+      "Generic": 18871,
+      "Reconnaissance": 3493,
+      "Shellcode": 378,
+      "Worms": 44
+    }
+  },
+  "XGBoost": {
+    "n": 43637,
+    "pct_of_attacks": 96.261,
+    "per_class": {
+      "Analysis": 628,
+      "Backdoor": 573,
+      "DoS": 4031,
+      "Exploits": 10982,
+      "Fuzzers": 4677,
+      "Generic": 18853,
+      "Reconnaissance": 3482,
+      "Shellcode": 367,
+      "Worms": 44
+    }
+  },
+  "Transformer": {
+    "n": 44982,
+    "pct_of_attacks": 99.228,
+    "per_class": {
+      "Analysis": 659,
+      "Backdoor": 582,
+      "DoS": 4071,
+      "Exploits": 10966,
+      "Fuzzers": 5926,
+      "Generic": 18864,
+      "Reconnaissance": 3494,
+      "Shellcode": 376,
+      "Worms": 44
+    }
+  }
+}

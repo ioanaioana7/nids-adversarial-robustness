@@ -53,14 +53,39 @@
 	top=25.4mm,
 }
 
+% Permite intinderea spatiilor dintre cuvinte ca ultima solutie, pentru a evita
+% liniile care depasesc marginea. Necesar in romana, unde cuvintele lungi si
+% legaturile nedespartibile (ex. "subsectiunea~4.6") pot bloca despartirea.
+\emergencystretch=1.5em
+
+% Clasa report cu optiunea twoside activeaza \flushbottom, care intinde pe
+% verticala paginile ce nu se umplu exact, distribuind diferenta in spatiile
+% dintre paragrafe, in jurul titlurilor si al floaturilor. Efectul e vizibil mai
+% ales pe paginile de dinaintea unei figuri mari, care apar cu goluri intre
+% paragrafe. \raggedbottom lasa pagina sa se termine mai sus, iar spatiul ramas
+% se aduna la piciorul paginii, unde nu deranjeaza lectura.
+\raggedbottom
+
+% Diagrame (capitolele 4, 5 si 7). Nu modifica fontul, corpul de litera,
+% dimensiunea paginii sau marginile.
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,calc,shapes.geometric,backgrounds}
+
+% Stiluri comune pentru diagrame, ca toate figurile sa aiba acelasi aspect.
+\tikzset{
+  bloc/.style     = {draw, rounded corners=2pt, align=center, inner sep=4pt,
+                     minimum height=9mm, font=\footnotesize},
+  blocmare/.style = {bloc, minimum width=26mm},
+  eticheta/.style = {font=\scriptsize, inner sep=2pt},
+  sageata/.style  = {-{Stealth[length=2mm]}, thick},
+  punctat/.style  = {-{Stealth[length=2mm]}, thick, dashed},
+  grup/.style     = {draw, dashed, rounded corners=3pt, inner sep=6pt}
+}
 
 \begin{document}
 \include{foi_de_capat} % Primele 3 pagini
-%%%%%%%%%%%%%%%%% Pagina cu instructiuni de eliminat
-\thispagestyle{empty}
-\include{ghid}
-\newpage
-%%%%%%%%%%%%%%%%%% sf. pagina cu instructini
+% Pagina cu instructiunile sablonului a fost eliminata din versiunea finala,
+% conform cerintei din ghid.tex. Fisierul ramane in proiect, neinclus.
 \pagestyle{fancy}
 \setlength\headheight{16.0pt}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername~\thechapter.~#1}{}}
@@ -119,8 +144,7 @@
 
 \include{concluzii} % \chapter{Concluzii}
 
-\bibliographystyle{IEEEtran}
-\bibliography{licenta}%same file name as for .bib
+\include{bibliografie} % Bibliografie — thebibliography manual, format IEEE
 
 \include{anexe}
 

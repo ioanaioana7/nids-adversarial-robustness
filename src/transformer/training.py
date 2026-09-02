@@ -185,7 +185,8 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader,
           checkpoint_path=config.TRANSFORMER_CHECKPOINT_PATH,
           checkpoint_every: int = config.TRANSFORMER_CHECKPOINT_EVERY,
           resume: bool = True,
-          window: int = config.TRANSFORMER_SELECTION_WINDOW) -> tuple[dict, list]:
+          window: int = config.TRANSFORMER_SELECTION_WINDOW,
+          loader_factory=None) -> tuple[dict, list]:
     """Antreneaza cu early stopping pe macro-F1 de validare, cu checkpointing.
 
     Macro-F1 (nu acuratetea) e criteriul, pentru ca setul e puternic dezechilibrat:
@@ -207,6 +208,12 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader,
         checkpoint_path (Path): unde se salveaza starea de antrenare.
         checkpoint_every (int): interval (in epoci) intre salvarile periodice.
         resume (bool): daca True si exista un checkpoint, continua de acolo.
+        loader_factory (callable | None): daca e dat, se apeleaza cu numarul
+            epocii si returneaza DataLoader-ul acelei epoci. Exista pentru O6:
+            augmentarea adversariala reesantioneaza variantele la fiecare epoca,
+            deci loturile nu mai pot fi fixate o singura data inainte de bucla.
+            Cu None (implicit, cazul O1) se foloseste train_loader la fiecare
+            epoca, iar comportamentul e neschimbat.
 
     Returns:
         tuple[dict, list]: (rezumatul antrenarii, istoricul per epoca).
@@ -230,8 +237,9 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader,
     for epoch in range(start_epoch, max_epochs + 1):
         model.train()
         started = time.time()
+        epoch_loader = loader_factory(epoch) if loader_factory is not None else train_loader
         total_loss, n_batches = 0.0, 0
-        for num, cat, target in train_loader:
+        for num, cat, target in epoch_loader:
             num, cat, target = num.to(device), cat.to(device), target.to(device)
             optimizer.zero_grad()
             loss = criterion(model(num, cat), target)

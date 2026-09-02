@@ -223,19 +223,33 @@ PERTURBATION_TYPES: dict[str, tuple] = {
 }
 
 
-def build_context(train: pd.DataFrame, test: pd.DataFrame) -> dict:
+def build_context(*frames: pd.DataFrame) -> dict:
     """Pregateste lookup-urile necesare generatoarelor.
 
+    O2/O3 apeleaza build_context(train, test): modelele sunt inghetate, deci
+    statisticile senzorului nu intra niciodata in antrenare si folosirea ambelor
+    partitii nu produce scurgere de date.
+
+    O6 apeleaza build_context(train): acolo variantele perturbate DEVIN date de
+    antrenare, deci orice statistica derivata din test ar fi scurgere. Cheia
+    "source_frames" din context inregistreaza numarul de randuri per cadru
+    sursa, ca apelantul sa poata verifica ulterior din ce a fost construit.
+
     Parameters:
-        train (pd.DataFrame): setul de antrenare brut.
-        test (pd.DataFrame): setul de test brut.
+        *frames (pd.DataFrame): cadrele brute din care se citesc maparile.
 
     Returns:
-        dict: contextul cu maparile ct_state_ttl.
+        dict: contextul cu maparile ct_state_ttl si provenienta lor.
+
+    Raises:
+        ValueError: daca nu se da niciun cadru.
     """
+    if not frames:
+        raise ValueError("build_context are nevoie de cel putin un cadru sursa")
     return {
-        "ct_lookup": dependencies.build_ct_state_ttl_lookup(train, test),
-        "normal_lookup": dependencies.build_normal_signature_lookup(train, test),
+        "ct_lookup": dependencies.build_ct_state_ttl_lookup(*frames),
+        "normal_lookup": dependencies.build_normal_signature_lookup(*frames),
+        "source_frames": [int(len(f)) for f in frames],
     }
 
 

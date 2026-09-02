@@ -1,13 +1,60 @@
-\chapter{Concluzii}
+\chapter{Concluzii}\label{ch:concluzii}
 \pagestyle{fancy}
 
-{\noindent\color{blue} Între 1 și 2 pagini.\\}
+\section{Contribuții}\label{sec:contributii}
 
-Capitolul ar trebui sa conțină (nu se rezumă neapărat la):
-\begin{itemize}
-	\item un rezumat al contribuțiilor voastre
-	\item analiză critică a rezultatelor obținute
-	\item descriere a posibilelor dezvoltări și îmbunătățiri ulterioare
-\end{itemize}
+Lucrarea a evaluat empiric robustețea a trei clasificatoare de trafic de rețea în fața unor modificări adversariale realizabile, folosind setul de date UNSW-NB15. Contribuțiile pot fi grupate în trei categorii.
 
+\textbf{Contribuții metodologice.} A fost formulată o mulțime de perturbări admisibile care înlocuiește vecinătatea metrică uzuală din literatura exemplelor adversariale cu o mulțime structurată, definită prin patru condiții: direcționalitate, limite relative la observația originală, imuabilitatea caracteristicilor aflate în afara controlului atacatorului și închiderea la relațiile de dependență dintre caracteristici. Ultima condiție a necesitat un mecanism propriu de propagare, enunțat în subsecțiunea~\ref{subsec:propagare}, care recalculează exact caracteristicile derivate fără a cunoaște constantele senzorului care a produs datele și fără a altera valorile originale. A fost tratată explicit situația unei caracteristici care nu poate fi reconstituită din înregistrări izolate, prin raportarea rezultatului sub formă de interval delimitat de două ipoteze declarate, în locul unei valori unice obținute printr-o presupunere nedeclarată. Pentru partea de apărare a fost formulat un protocol experimental care separă efectul perturbării de cel al volumului suplimentar de date, prin introducerea unui grup de control antrenat pe același număr de exemple neperturbate, prin înghețarea ponderilor de clasă la valorile calculate pe setul original și prin raportarea ratelor pe o mulțime de fluxuri fixată în prealabil, comună tuturor variantelor comparate. Criteriile de succes au fost consemnate înaintea rulării, iar rezultatul este raportat inclusiv acolo unde ele nu au fost îndeplinite.
 
+\textbf{Contribuții experimentale.} Au fost antrenate și evaluate comparativ trei modele cu predispoziții inductive diferite, două ansambluri de arbori și o arhitectură bazată pe atenție implementată de la zero, iar ratele lor de evaziune au fost măsurate sub 28 de variante de perturbare. Analiza de sensibilitate a legat cantitativ rezistența fiecărui model de distribuția importanței caracteristicilor sale, prin introducerea unei mărimi care exprimă ce fracțiune din capacitatea de detecție a unui model se află efectiv la îndemâna atacatorului. Cele trei modele au fost apoi reantrenate pe date augmentate cu variante perturbate și reevaluate în aceleași condiții, alături de un grup de control și de un grup antrenat cu o familie de transformări exclusă deliberat, care măsoară dacă robustețea obținută se transferă la modificări nevăzute la antrenare.
+
+\textbf{Contribuții practice.} A fost realizată o interfață care permite explorarea interactivă a comportamentului modelelor sub perturbări cu parametri arbitrari, construită astfel încât să compună aceleași primitive validate ca experimentele sistematice, nu o implementare paralelă a acestora.
+
+\section{Analiza critică a rezultatelor}\label{sec:critica}
+
+Rezultatul principal este că o singură modificare a valorii TTL, realizabilă prin configurarea socketului, restrânsă la valori compatibile cu păstrarea funcționalității atacului în modelul de amenințare adoptat și fără nicio cunoaștere a sistemului de detecție, duce modelul cu cel mai mare macro-$F1$ pe traficul nemodificat de la $0\%$ la peste $50\%$ evaziune. Realizabilitatea acestei modificări este argumentată în cadrul experimental adoptat, nu demonstrată prin generarea și retransmiterea traficului real, conform limitării enunțate în secțiunea~\ref{sec:limitari}. Combinată cu umplutură și dilatare temporală, rata ajunge la aproape $97\%$. Celelalte transformări analizate lasă evaziunea sub $1{,}3\%$ la orice intensitate.
+
+Reantrenarea pe trafic perturbat elimină aproape complet această vulnerabilitate: evaziunea în cel mai rău caz scade sub $0{,}5\%$ la toate cele trei modele, iar câștigul se menține și față de grupul de control, deci nu provine din volumul suplimentar de date. Costul este modest pe metricile globale, sub $0{,}023$ de macro-$F1$, dar concentrat: clasa cea mai rară pierde între $0{,}075$ și $0{,}127$, ceea ce o metrică agregată ar fi ascuns.
+
+Trei constatări merită subliniate pentru că nuanțează concluzii care altfel ar fi fost formulate greșit.
+
+Prima privește relația dintre acuratețe și robustețe. Modelul cu cele mai bune metrici pe trafic nemodificat este și cel mai fragil sub perturbare, iar analiza importanței prin permutare oferă o explicație plauzibilă: $54{,}6\%$ din scăderea totală a ratei de detecție măsurată astfel se concentrează într-o singură caracteristică. Rezultă că evaluarea exclusiv pe trafic nemodificat nu este suficientă pentru caracterizarea comportamentului adversarial, iar selecția unui model pe baza acuratețeii poate conduce la alegerea celui mai vulnerabil.
+
+A doua privește interpretarea rezistenței observate. Transformer cedează cel mai puțin la perturbările realizabile, dar analiza de sensibilitate sugerează că această rezistență este explicată în mare măsură de dependența de caracteristici aflate în afara controlului atacatorului: doar $26{,}0\%$ din capacitatea sa de detecție îi este accesibilă, iar caracteristica pe care se sprijină preponderent este generată de victimă. Atunci când constrângerea de accesibilitate este relaxată artificial, rata sa de evaziune urcă la $71{,}1\%$. Ceea ce s-ar fi putut raporta drept robustețe arhitecturală se explică, prin urmare, în bună măsură printr-o particularitate a datelor. O evaluare bazată exclusiv pe ratele de evaziune, fără analiza de sensibilitate, ar fi condus la recomandarea eronată de a prefera această arhitectură.
+
+A treia privește interpretarea apărării. Ratele apropiate de zero obținute după reantrenare se referă la exact familia de transformări folosită la antrenare, iar întrebarea dacă modelul a învățat proprietatea care face aceste transformări eficiente sau doar transformările înseși nu poate fi decisă măsurând pe ele. Grupul antrenat cu familia TTL exclusă și măsurat tocmai pe ea răspunde direct: Random Forest coboară de la $80{,}3\%$ la $11{,}8\%$ pe transformări pe care nu le-a văzut niciodată, în timp ce celelalte două modele rămân practic neschimbate, iar unul dintre ele devine chiar mai vulnerabil pe două variante. Invarianța învățată se transferă, prin urmare, doar la unul dintre cele trei modele. Fără acest grup, rezultatul ar fi fost raportat ca robustețe generală la perturbări realizabile, ceea ce datele nu susțin.
+
+\section{Limitări}\label{sec:limitari}
+
+Rezultatele trebuie interpretate în limitele următoare.
+
+\textbf{Un singur set de date.} Toate concluziile sunt obținute pe UNSW-NB15. Constatarea că valoarea TTL funcționează ca artefact al mediului de captură este specifică acestui set. Ea sugerează însă că verificarea existenței unor artefacte similare ar trebui să preceadă orice evaluare de robustețe pe alt set. Tot de partiția oficială ține și nivelul ridicat al alarmelor false pe traficul legitim, între $24{,}4\%$ și $41{,}4\%$, discutat în subsecțiunea~\ref{subsec:semnalare}: cele două jumătăți ale partiției nu au aceeași distribuție, iar la testare modelele întâlnesc de două ori mai mult trafic legitim purtând semnătura TTL învățată ca indiciu de atac. Aceste valori nu afectează concluziile privind evaziunea, care se sprijină exclusiv pe rata de semnalare a atacurilor, dar limitează orice afirmație despre utilitatea operațională a modelelor.
+
+\textbf{Perturbări în spațiul caracteristicilor.} Modificările sunt aplicate reprezentării tabelare, cu argumentarea că fiecare corespunde unei acțiuni realizabile asupra traficului. Validarea completă ar presupune generarea traficului modificat, trecerea lui printr-un senzor real și compararea caracteristicilor rezultate cu cele calculate prin propagare.
+
+\textbf{Atacator neadaptiv.} Modelul de amenințare exclude interogarea sistemului de detecție. Un atacator cu acces la răspunsurile modelului ar obține rezultate cel puțin la fel de bune, deci valorile raportate constituie estimări conservatoare.
+
+\textbf{Contorul de context nereconstituibil.} Pentru transformările care implică valori TTL, rezultatul este un interval, uneori larg. Determinarea valorii reale ar necesita datele de flux brute, cu contextul temporal al fiecărei conexiuni.
+
+\textbf{O singură rundă a interacțiunii atac-apărare.} Apărarea evaluată presupune că atacatorul își păstrează transformările neschimbate după reantrenare. Un atacator care ar observa modelul apărat și și-ar reoptimiza modificările împotriva lui rămâne în afara cadrului: rezultatele descriu o rundă a acestei interacțiuni, nu punctul ei de echilibru.
+
+\textbf{Robustețe limitată la familia de transformări cunoscută.} Grupul antrenat cu familia TTL exclusă arată că invarianța învățată se transferă la transformări nevăzute doar pentru unul dintre cele trei modele. Pentru celelalte două, valorile apropiate de zero obținute pe familia cunoscută nu pot fi extinse la perturbări realizabile în general. Măsurarea acestei limite a fost posibilă doar pentru că o familie a fost exclusă deliberat. Un experiment fără acest grup ar fi raportat o robustețe pe care rezultatele nu o susțin.
+
+\section{Dezvoltări ulterioare}\label{sec:dezvoltari}
+
+Direcțiile de continuare decurg direct din limitările enumerate.
+
+\textbf{Validarea la nivel de trafic.} Reconstruirea perturbărilor asupra fișierelor de captură brute și trecerea lor printr-un senzor real ar transforma argumentul de realizabilitate din unul deductiv în unul verificat experimental. Este cea mai valoroasă continuare, întrucât adresează limitarea cea mai importantă.
+
+\textbf{Extinderea la alte seturi de date.} Repetarea experimentului pe seturi produse în medii de captură diferite ar permite distincția între vulnerabilitățile datorate arhitecturii modelului și cele datorate particularităților unui set anume.
+
+\textbf{Atacuri adaptive.} Modelul Transformer este diferențiabil de la un capăt la altul, ceea ce permite, spre deosebire de ansamblurile de arbori, aplicarea metodelor bazate pe gradient. Compararea rezultatelor acestora cu perturbările structurate din prezenta lucrare ar arăta cât din diferență provine din puterea metodei și cât din relaxarea constrângerilor de realizabilitate.
+
+\textbf{Atacatori adaptivi împotriva modelului apărat.} Continuarea imediată a părții de apărare este a doua rundă a interacțiunii: generarea de transformări optimizate împotriva modelului reantrenat, urmată de o nouă reantrenare. Rezultatul relevant nu este rata de evaziune la o rundă anume, ci dacă succesiunea converge sau oscilează.
+
+\textbf{Recuperarea claselor rare.} Degradarea clasei celei mai rare este cel mai clar cost al procedurii actuale. Direcțiile evidente sunt augmentarea diferențiată, care să adauge copii perturbate proporțional cu fragilitatea fiecărei clase în loc de uniform, și recalcularea ponderilor de clasă pe numărătorile augmentate. Această a doua direcție a fost exclusă aici deliberat, pentru comparabilitatea funcției de cost, dar devine rezonabilă odată ce comparația controlată a fost făcută.
+
+\textbf{Alte mecanisme de apărare.} Cadrul de măsurare rămâne direct reutilizabil pentru contramăsuri de alt tip: eliminarea deliberată a caracteristicilor identificate ca artefacte sau regularizarea care descurajează concentrarea deciziei într-o singură caracteristică. Mărimea introdusă în subsecțiunea~\ref{subsec:accesibila} poate servi în acest context drept criteriu de proiectare, nu doar de diagnostic: un model proiectat astfel încât să reducă dependența de caracteristici ușor controlabile de atacator ar putea prezenta o robustețe mai bună față de familia de perturbări analizată.
+
+\textbf{Selecția caracteristicilor orientată către robustețe.} Rezultatele sugerează că excluderea deliberată a caracteristicilor ușor de manipulat ar putea reduce acuratețea pe trafic nemodificat, dar crește robustețea. Cuantificarea acestui compromis constituie o direcție de cercetare distinctă.

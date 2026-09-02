@@ -1,14 +1,215 @@
-\chapter{Manual de instalare și utilizare}
+\chapter{Manual de instalare și utilizare}\label{ch:manual}
 \pagestyle{fancy}
 
-În secțiunea de Instalare trebuie să detaliați resursele software și hardware necesare pentru instalarea și rularea aplicației, precum și o descriere pas cu pas a procesului de instalare.
+Capitolul descrie cerințele necesare rulării aplicației, procedura de instalare pas cu pas, ordinea de execuție a etapelor experimentale și modul de utilizare a interfeței interactive. Informațiile sunt suficiente pentru instalarea și rularea completă a aplicației pe un sistem nou.
 
-Instalarea aplicației trebuie să fie posibilă pe baza a ceea ce se scrie aici.
+\section{Cerințe}\label{sec:cerinte}
 
-În acest capitol trebuie să descrieți cum se utilizează aplicația din punct de vedere al utilizatorului, fără a menționa aspecte tehnice interne.
+\subsection{Cerințe hardware}\label{subsec:hardware}
 
-Folosiți capturi ale ecranului și explicații pas cu pas ale interacțiunii.
+Cerințele minime și cele recomandate sunt prezentate în tabelul~\ref{tab:hardware}.
 
-Folosind acest manual, o persoană ar trebui să poată utiliza produsul vostru.
+\begin{table}[!ht]
+    \caption{Cerințe hardware}
+    \centering
+    \begin{tabular}{|l|p{3.6cm}|p{4.4cm}|}
+        \hline
+        \textbf{Resursă} & \textbf{Minim} & \textbf{Recomandat} \\
+        \hline
+        Memorie & 8 GB & 16 GB \\
+        \hline
+        Spațiu pe disc & 5 GB & 12 GB \\
+        \hline
+        Procesor & 8 nuclee & 12 nuclee \\
+        \hline
+        Placă grafică & Nu este necesară & NVIDIA cu suport CUDA 12 \\
+        \hline
+    \end{tabular}
+    \label{tab:hardware}
+\end{table}
 
-{\noindent\color{blue} Între 1 și 5 pagini.\\}
+Placa grafică este opțională, dar are un efect major asupra duratei în ceea ce privește antrenarea Transformer, celelalte etape fiind executate exclusiv pe procesor.
+
+\subsection{Cerințe software}\label{subsec:software}
+
+Aplicația necesită interpretorul Python 3.12, versiunea pe care a fost dezvoltată și testată. Bibliotecile utilizate, împreună cu versiunile cu care au fost produse rezultatele raportate în capitolul~\ref{ch:testare}, sunt listate în tabelul~\ref{tab:biblioteci}.
+
+\begin{table}[H]
+    \caption{Bibliotecile necesare și versiunile utilizate}
+    \centering
+    \begin{tabular}{|l|c|p{4.0cm}|}
+        \hline
+        \textbf{Bibliotecă} & \textbf{Versiune} & \textbf{Rol} \\
+        \hline
+        pandas & 3.0.5 & Manipularea datelor tabelare \\
+        \hline
+        numpy & 2.4.6 & Calcul numeric \\
+        \hline
+        scikit-learn & 1.9.0 & Random Forest, preprocesare, metrici \\
+        \hline
+        xgboost & 3.4.0 & Modelul cu XGBoost \\
+        \hline
+        joblib & 1.5.3 & Serializarea modelelor \\
+        \hline
+        scipy & 1.18.0 & Teste statistice \\
+        \hline
+        matplotlib & 3.11.1 & Generarea figurilor \\
+        \hline
+        shap & 0.52.0 & Interpretabilitate (opțional) \\
+        \hline
+        torch & 2.5.1 & Transformer \\
+        \hline
+        streamlit & 1.62.0 & Interfața interactivă \\
+        \hline
+    \end{tabular}
+    \label{tab:biblioteci}
+\end{table}
+
+Versiunile sunt fixate deliberat. Sunt cele cu care au fost obținute rezultatele raportate, iar fișierul de metadate generat la fiecare rulare le înregistrează, astfel încât o eventuală diferență de rezultate să poată fi atribuită corect.
+
+\section{Instalarea}\label{sec:instalare}
+
+\subsection{Pregătirea mediului}\label{subsec:mediu-instalare}
+
+Se recomandă crearea unui mediu virtual dedicat, pentru a evita conflictele cu alte proiecte instalate pe același sistem. După activarea mediului, dependențele se instalează dintr-un singur fișier de specificații inclus în proiect.
+
+\subsection{Instalarea bibliotecii de învățare profundă}\label{subsec:torch}
+
+Această etapă necesită atenție specială și este singura care poate eșua pe un sistem configurat corect în rest.
+
+Instalarea implicită aduce varianta care se execută pe procesor. Pentru utilizarea plăcii grafice, biblioteca trebuie instalată \emph{separat și înainte} de celelalte dependențe, indicând explicit depozitul corespunzător versiunii CUDA instalate.
+
+Pe sistemele Windows există o restricție suplimentară: versiunile 2.6 și ulterioare ale bibliotecii conțin căi de fișier care depășesc limita de lungime impusă implicit de sistemul de operare. Instalarea eșuează cu o eroare referitoare la lungimea numelui de fișier și, mai grav, lasă în urmă o instalare parțială fără fișierul de evidență, care împiedică atât utilizarea, cât și dezinstalarea curată. Din acest motiv, versiunea este fixată la 2.5.1.
+
+\subsection{Selectarea interpretorului Python}
+\label{subsec:doua-python}
+
+Atunci când pe același sistem sunt instalate mai multe versiuni de Python, comenzile de instalare și de execuție pot utiliza interpretoare diferite. În această situație, aplicația poate raporta că o bibliotecă nu este disponibilă, chiar dacă instalarea acesteia s-a încheiat cu succes pentru o altă versiune de Python.
+
+Pentru evitarea acestei probleme, comenzile trebuie executate folosind explicit interpretorul în care au fost instalate dependențele. Se recomandă și lansarea componentelor aplicației ca module Python, prin același interpretor. Această metodă poate fi utilizată inclusiv atunci când comenzile asociate bibliotecilor nu sunt disponibile în calea de căutare a sistemului.
+
+\subsection{Pregătirea datelor}\label{subsec:date-instalare}
+
+Setul de date UNSW-NB15 nu este inclus în proiect din cauza dimensiunii. Fișierele partiției oficiale de antrenare și testare trebuie descărcate de la sursa oficială și plasate în directorul de resurse al proiectului, păstrând denumirile originale. Aplicația verifică prezența și structura acestora la pornire și semnalează explicit lipsa lor.
+
+\section{Rularea etapelor experimentale}\label{sec:rulare}
+
+Etapele se execută în ordinea din tabelul~\ref{tab:rulare}. Fiecare etapă își salvează rezultatele pe disc și poate fi reluată independent, cu condiția ca etapele de care depinde să fi fost executate anterior.
+
+\begin{table}[H]
+    \caption{Ordinea de execuție și dependențele etapelor}
+    \centering
+    \begin{tabular}{|c|p{7.0cm}|c|}
+        \hline
+        \textbf{Nr.} & \textbf{Etapă} & \textbf{Depinde de} \\
+        \hline
+        1 & Antrenarea ansamblurilor de arbori & --- \\
+        \hline
+        2 & Antrenarea Transformerului & --- \\
+        \hline
+        3 & Generarea variantelor perturbate & 1, 2 \\
+        \hline
+        4 & Măsurarea ratei de evaziune & 3 \\
+        \hline
+        5 & Analiza de sensibilitate & 4 \\
+        \hline
+        6 & Antrenarea adversarială & 1--4 \\
+        \hline
+        7 & Lansarea interfeței interactive & 1--6 \\
+        \hline
+    \end{tabular}
+    \label{tab:rulare}
+\end{table}
+
+Fiecare etapă scrie un jurnal de execuție în directorul de rezultate, în care sunt înregistrate parametrii utilizați, verificările efectuate și eventualele avertismente. În cazul unei execuții eșuate, jurnalul este primul loc care trebuie consultat.
+
+O verificare utilă după rularea completă este inspectarea fișierului de metadate: dacă versiunile bibliotecilor înregistrate acolo diferă de cele din tabelul~\ref{tab:biblioteci}, eventualele diferențe față de rezultatele raportate au o explicație imediată.
+
+\subsection{Particularitățile etapei de antrenare adversarială}
+\label{subsec:rulare-adversarial}
+
+Etapa de antrenare adversarială produce un set separat de modele și necesită mai multe resurse decât celelalte etape ale aplicației.
+
+Procesul este împărțit în patru subetape, care pot fi executate și separat: pregătirea seturilor augmentate și a fișierului de metadate, antrenarea ansamblurilor de arbori, antrenarea rețelei și evaluarea modelelor obținute. Antrenarea arborilor utilizează în principal procesorul, iar antrenarea rețelei folosește placa grafică. Dacă sistemul dispune de resurse suficiente, cele două subetape pot fi executate în paralel.
+
+Procesul poate fi reluat fără repetarea tuturor operațiilor. La o nouă execuție, modelele deja salvate și evaluările finalizate sunt identificate automat, iar rularea continuă de la primul element nefinalizat. În cazul unei întreruperi, trebuie repetată numai antrenarea modelului aflat în curs. Pentru a reantrena intenționat un anumit model, fișierul corespunzător trebuie eliminat din directorul destinat rezultatelor acestei etape.
+
+Modelele obținute sunt salvate într-un director separat și nu suprascriu modelele de referință. Prin urmare, rezultatele etapelor anterioare rămân disponibile după finalizarea antrenării adversariale. Executarea completă a etapei necesită spațiu suplimentar pentru stocarea modelelor, necesar inclus în recomandările din tabelul~\ref{tab:hardware}.
+
+\section{Utilizarea interfeței interactive}\label{sec:utilizare}
+
+\subsection{Pornirea și organizarea ecranului}\label{subsec:pornire}
+
+Interfața se lansează ca aplicație web locală și se deschide automat în browserul implicit. La prima pornire, încărcarea modelelor și a datelor durează aproximativ 20 de secunde. Ulterior, acestea rămân în memorie, iar interacțiunile sunt imediate.
+
+Ecranul este împărțit în două zone, prezentate schematic în figura~\ref{fig:ecran}: o bară laterală în stânga, care conține toate controalele, și zona principală din dreapta, organizată în patru file.
+
+\begin{figure}[!ht]
+    \centering
+    \begin{tikzpicture}[node distance=3mm and 6mm]
+        \node[bloc, minimum width=34mm, minimum height=8mm] (t1) {Clasă de atac};
+        \node[bloc, minimum width=34mm, minimum height=8mm, below=of t1] (t2) {Număr de fluxuri};
+        \node[bloc, minimum width=34mm, minimum height=8mm, below=6mm of t2] (m1) {Valoare TTL};
+        \node[bloc, minimum width=34mm, minimum height=8mm, below=of m1] (m2) {Umplutură (\%)};
+        \node[bloc, minimum width=34mm, minimum height=8mm, below=of m2] (m3) {Durată, contoare ($\times$)};
+        \node[bloc, minimum width=34mm, minimum height=8mm, below=of m3] (m4) {Politică de context};
+        \node[bloc, minimum width=34mm, minimum height=8mm, below=6mm of m4, very thick] (run) {\textbf{Rulează}};
+
+        \node[eticheta, above=1mm of t1] (lt) {\textit{Trafic}};
+        \node[eticheta] at ($(t2.south)!0.5!(m1.north)$) {\textit{Modificări}};
+
+        \node[bloc, minimum width=64mm, minimum height=12mm, right=14mm of t1.north east, anchor=north west]
+            (file) {Rezultat \;$\vert$\; Un flux\\ Măsurători \;$\vert$\; Antrenare adversarială};
+        \node[bloc, minimum width=64mm, minimum height=12mm, below=5mm of file] (met)
+            {Rata de evaziune, per model};
+        \node[bloc, minimum width=64mm, minimum height=20mm, below=of met] (chart)
+            {Diagramă stivuită:\\ detectat corect \;$\vert$\; alt atac \;$\vert$\; evaziune};
+        \node[bloc, minimum width=64mm, minimum height=9mm, below=of chart] (chg)
+            {Caracteristicile efectiv modificate};
+
+        \draw[sageata] (run.east) to[out=0, in=180] node[eticheta, below right, pos=0.08] {recalculare} ($(met.west)+(0,-2mm)$);
+
+        \begin{scope}[on background layer]
+            \node[grup, fit=(lt)(t1)(m4)(run), label={[eticheta]above:\textbf{Bară laterală}}] {};
+            \node[grup, fit=(file)(chg), label={[eticheta]above:\textbf{Zonă principală}}] {};
+        \end{scope}
+    \end{tikzpicture}
+    \caption{Organizarea ecranului interfeței interactive. Nimic nu se recalculează până la acționarea butonului, astfel încât rezultatele afișate corespund întotdeauna ultimei rulări.}
+    \label{fig:ecran}
+\end{figure}
+
+\subsection{Stabilirea parametrilor și rularea}\label{subsec:parametri}
+
+Utilizatorul introduce valorile dorite în bara laterală, apoi apasă butonul de rulare. Până la apăsarea butonului nu se recalculează nimic: valorile afișate în zona principală corespund întotdeauna ultimei rulări, nu câmpurilor editate între timp. Sub titlu este afișat, într-un singur rând, rezumatul parametrilor efectiv aplicați, tocmai pentru ca o eventuală diferență față de câmpurile editate să fie vizibilă.
+
+Controalele disponibile sunt următoarele:
+
+\begin{description}[style=nextline]
+    \item[Clasa de atac.] Selectează categoria de trafic malițios analizată sau, alternativ, toate categoriile.
+    \item[Numărul de fluxuri.] Stabilește dimensiunea eșantionului asupra căruia se aplică perturbarea. Valorile mari cresc precizia estimării și timpul de calcul.
+    \item[Valoarea TTL.] Valoarea către care este modificat TTL-ul pachetelor emise. Poate fi dezactivată complet.
+    \item[Umplutura.] Procentul de octeți adăugați la volumul transmis.
+    \item[Factorul de durată.] Multiplicatorul aplicat duratei fluxului.
+    \item[Factorul contoarelor.] Multiplicatorul aplicat contoarelor de conexiuni. Valorile subunitare corespund unei încetiniri a atacului.
+    \item[Politica de context.] Selectează una dintre cele două ipoteze descrise în subsecțiunea~\ref{subsec:interval}.
+\end{description}
+
+Spre deosebire de experimentele sistematice, care folosesc un set predefinit de niveluri, interfața acceptă valori arbitrare în limitele fizic admisibile.
+
+\subsection{Interpretarea rezultatelor}\label{subsec:interpretare}
+
+Fila \textit{Rezultat} afișează, pentru fiecare dintre cele trei modele, rata de evaziune obținută și numărul de fluxuri eligibile care au intrat în calcul. Sub acestea, o diagramă cu bare orizontale prezintă distribuția celor trei rezultate posibile, folosind un cod de culoare constant: verde pentru fluxurile detectate corect, galben pentru cele confundate cu alt tip de atac și roșu pentru evaziune. Un rând final indică ce caracteristici au fost efectiv modificate de configurația curentă.
+
+Fila \textit{Un flux} permite inspectarea unui singur flux, selectat prin index. Sunt afișate identificatorul și eticheta reală, tabelul valorilor modificate, cu valoarea dinainte și cea de după, și, pentru fiecare model, tranziția de la predicția pe traficul nemodificat la cea pe varianta perturbată, colorată conform aceluiași cod. Această vedere este utilă pentru a înțelege concret ce anume se schimbă într-un flux și cum reacționează fiecare model.
+
+Fila \textit{Măsurători} prezintă tabelele și figurile obținute în urma rulărilor sistematice, pentru comparație cu rezultatele explorate interactiv.
+
+Rezultatele reantrenării, discutate în secțiunea~\ref{sec:rezultate-o6}, sunt prezentate în ultima filă. Pentru fiecare model și fiecare grup sunt afișate macro-$F1$ pe traficul nemodificat și rata de evaziune în cel mai rău caz, împreună cu varianta care o produce și cu dimensiunea mulțimii comune pe care s-a măsurat. Un selector permite alegerea modelului pentru care se afișează confruntarea cu criteriile stabilite înaintea rulării.
+
+\subsection{Situații speciale}\label{subsec:situatii}
+
+Dacă o combinație de parametri produce o variantă care încalcă o constrângere de validitate, interfața afișează un mesaj de eroare care indică verificarea încălcată, în locul unei rate de evaziune. Comportamentul este intenționat: un rezultat obținut pentru un flux imposibil fizic ar fi lipsit de semnificație.
+
+Dacă selecția nu conține niciun flux eligibil, situație posibilă la eșantioane foarte mici din clase rare, se afișează un avertisment corespunzător, întrucât rata de evaziune nu este definită pe o mulțime vidă.
+
+Dacă fila \textit{Măsurători} sau fila \textit{Antrenare adversarială} indică absența rezultatelor, etapele sistematice corespunzătoare din tabelul~\ref{tab:rulare} nu au fost încă executate. Fiecare filă semnalează separat această situație, iar restul interfeței rămâne funcțional, întrucât explorarea live nu depinde de aceste etape.

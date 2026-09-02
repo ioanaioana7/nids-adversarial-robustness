@@ -1,0 +1,13 @@
+model,arm,metric,n_seeds,worst_case_mean,worst_case_std,worst_case_min,worst_case_max,worst_variants
+RandomForest,c1,evasion_rate,3,75.5131,0.4114,75.0739,75.8894,combined_mimic_L4
+RandomForest,o1,evasion_rate,3,80.3182,4.3173,75.8361,84.4492,combined_mimic_L4
+RandomForest,o6,evasion_rate,3,0.1778,0.0366,0.1556,0.22,combined_mimic_L4
+RandomForest,o6_loo,evasion_rate,1,11.842,0.0,11.842,11.842,combined_mimic_L4
+Transformer,c1,evasion_rate,3,72.5172,5.8125,68.214,79.1294,combined_mimic_L4
+Transformer,o1,evasion_rate,3,70.9158,8.5526,62.3227,79.4273,combined_mimic_L4
+Transformer,o6,evasion_rate,3,0.1853,0.0723,0.1112,0.2557,"combined_mimic_L3,combined_mimic_L4"
+Transformer,o6_loo,evasion_rate,1,69.6545,0.0,69.6545,69.6545,combined_mimic_L4
+XGBoost,c1,evasion_rate,3,96.2425,0.1972,96.0859,96.464,combined_mimic_L4
+XGBoost,o1,evasion_rate,3,96.9017,0.0457,96.8742,96.9544,combined_mimic_L4
+XGBoost,o6,evasion_rate,3,0.4644,0.0718,0.385,0.5248,padding_L1
+XGBoost,o6_loo,evasion_rate,1,95.6803,0.0,95.6803,95.6803,combined_mimic_L4

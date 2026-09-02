@@ -1,0 +1,90 @@
+\begin{table}[!ht]
+    \caption{Importanța prin permutare (scăderea ratei de detecție, exprimată în puncte procentuale). Sunt listate caracteristicile cu efect nenul pentru cel puțin un model.}
+    \centering\footnotesize
+    \begin{tabular}{|l|r|r|r|}
+        \hline
+        \textbf{Caracteristică} & \textbf{RF} & \textbf{XGB} & \textbf{Transformer} \\
+        \hline
+        \texttt{sttl} & 0,993 & 10,995 & 1,286 \\
+        \hline
+        \texttt{dttl} & 0,533 & 0,044 & 5,064 \\
+        \hline
+        \texttt{dmean} & 0,087 & 2,107 & 0,063 \\
+        \hline
+        \texttt{dload} & 0,097 & 1,264 & 0,027 \\
+        \hline
+        \texttt{sbytes} & -0,092 & 0,952 & -- \\
+        \hline
+        \texttt{proto} & 0,620 & 0,235 & 0,855 \\
+        \hline
+        \texttt{smean} & -0,119 & 0,770 & 0,041 \\
+        \hline
+        \texttt{ct\_dst\_src\_ltm} & 0,170 & 0,722 & 0,189 \\
+        \hline
+        \texttt{ct\_srv\_src} & -0,017 & 0,635 & 0,022 \\
+        \hline
+        \texttt{swin} & 0,605 & -- & 0,094 \\
+        \hline
+        \texttt{sloss} & 0,593 & 0,378 & -0,012 \\
+        \hline
+        \texttt{djit} & 0,138 & 0,455 & 0,005 \\
+        \hline
+        \texttt{state} & 0,155 & -0,073 & 0,380 \\
+        \hline
+        \texttt{spkts} & -0,002 & 0,378 & -- \\
+        \hline
+        \texttt{ct\_state\_ttl} & 0,310 & 0,136 & 0,298 \\
+        \hline
+        \texttt{dinpkt} & 0,211 & -0,024 & -- \\
+        \hline
+        \texttt{ct\_srv\_dst} & -0,070 & 0,194 & 0,170 \\
+        \hline
+        \texttt{rate} & 0,051 & 0,186 & 0,010 \\
+        \hline
+        \texttt{dloss} & -0,015 & 0,186 & 0,007 \\
+        \hline
+        \texttt{sjit} & -0,019 & 0,153 & 0,044 \\
+        \hline
+        \texttt{dpkts} & 0,073 & 0,114 & 0,007 \\
+        \hline
+        \texttt{ackdat} & 0,097 & -0,090 & 0,090 \\
+        \hline
+        \texttt{sload} & -0,065 & 0,094 & -0,002 \\
+        \hline
+        \texttt{dtcpb} & 0,061 & 0,087 & -0,012 \\
+        \hline
+        \texttt{dur} & 0,078 & -0,092 & 0,002 \\
+        \hline
+        \texttt{service} & -0,073 & 0,036 & 0,075 \\
+        \hline
+        \texttt{dbytes} & 0,073 & -0,659 & -0,002 \\
+        \hline
+        \texttt{ct\_src\_dport\_ltm} & -0,148 & -0,121 & 0,065 \\
+        \hline
+        \texttt{ct\_dst\_ltm} & -0,121 & -0,208 & 0,044 \\
+        \hline
+        \texttt{ct\_flw\_http\_mthd} & 0,017 & 0,024 & -0,002 \\
+        \hline
+        \texttt{ct\_dst\_sport\_ltm} & 0,019 & -0,068 & -0,005 \\
+        \hline
+        \texttt{dwin} & 0,012 & -- & 0,019 \\
+        \hline
+        \texttt{sinpkt} & 0,017 & -0,085 & 0,002 \\
+        \hline
+        \texttt{trans\_depth} & -0,024 & -0,058 & 0,015 \\
+        \hline
+        \texttt{tcprtt} & 0,010 & -0,111 & -0,010 \\
+        \hline
+        \texttt{ct\_src\_ltm} & -0,085 & -0,262 & 0,007 \\
+        \hline
+        \texttt{response\_body\_len} & -- & -0,012 & 0,005 \\
+        \hline
+        \texttt{is\_sm\_ips\_ports} & 0,002 & -- & -- \\
+        \hline
+        \texttt{stcpb} & -0,027 & 0,002 & 0,002 \\
+        \hline
+        \texttt{synack} & -0,041 & 0,002 & -- \\
+        \hline
+    \end{tabular}
+    \label{tab:anexa-importanta}
+\end{table}

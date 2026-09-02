@@ -6,6 +6,9 @@ O5 — interfata de vizualizare si testare interactiva.
 Perturbarile se construiesc din primitivele validate in O2 (vezi
 ui/live_perturbation.py), deci ce se vede aici e acelasi lucru cu ce s-a masurat
 in O3 — nu o reimplementare paralela.
+
+Tabul "Antrenare adversariala" citeste artefactele produse de train_adversarial.py
+si lipseste, in mod controlat, daca etapa nu a fost rulata.
 """
 
 import sys
@@ -55,6 +58,12 @@ def load_data():
 @st.cache_data(show_spinner=False)
 def read_csv(path: Path):
     return pd.read_csv(path) if path.exists() else None
+
+
+@st.cache_data(show_spinner=False)
+def read_json(path: Path):
+    import json
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
 
 
 def controls():
@@ -236,6 +245,85 @@ def view_measurements():
             st.image(str(path), width="stretch")
 
 
+
+ARM_LABEL = {"o1": "O1 - original", "c1": "C1 - control (duplicate)",
+             "o6": "O6 - augmentare perturbata", "o6_loo": "O6-LOO - fara familia TTL"}
+ARM_ORDER = ["o1", "c1", "o6", "o6_loo"]
+
+
+def view_adversarial():
+    """Rezultatele reantrenarii pe trafic perturbat, cu bratul de control."""
+    worst = read_csv(config.ADVERSARIAL_DIR / "worst_case_global.csv")
+    clean = read_csv(config.ADVERSARIAL_DIR / "clean_summary.csv")
+    if worst is None or clean is None:
+        st.warning("Ruleaza `python train_adversarial.py`.")
+        return
+
+    cohorte = read_json(config.ADVERSARIAL_DIR / "cohort_sizes.json") or {}
+    verdict = read_json(config.ADVERSARIAL_DIR / "o6_verdict.json") or {}
+
+    st.markdown(
+        "Fiecare model a fost reantrenat pe trei seturi: cel original (**O1**), cel cu "
+        "duplicate **neperturbate** (**C1**) si cel cu copii **perturbate** (**O6**). "
+        "C1 adauga exact acelasi numar de randuri ca O6, deci cifra care conteaza este "
+        "diferenta O6 fata de C1, nu fata de O1.")
+
+    # ---- tabelul principal: cost pe trafic curat vs cel mai rau caz de evaziune ----
+    tabel = (worst.merge(clean, on=["model", "arm"], how="inner")
+             [["model", "arm", "macro_f1_mean", "worst_case_mean", "worst_case_std",
+               "worst_variants"]])
+    tabel["arm"] = pd.Categorical(tabel["arm"], ARM_ORDER, ordered=True)
+    tabel = tabel.sort_values(["model", "arm"])
+    tabel.columns = ["Model", "Brat", "macro F1 curat", "Evaziune, cel mai rau caz (%)",
+                     "abatere", "Varianta"]
+    st.dataframe(tabel.round(4), width="stretch", hide_index=True)
+
+    if cohorte:
+        st.caption("Cohorta comuna, pe care se masoara evaziunea: "
+                   + ",  ".join(f"{m} n={d['n']:,} ({d['pct_of_attacks']:.2f}%)"
+                                for m, d in cohorte.items()))
+
+    # ---- verdictul fata de criteriile fixate inaintea rularii ----
+    verdicte = verdict.get("verdicts", {})
+    if verdicte:
+        st.subheader("Criteriile stabilite inaintea rularii")
+        ales = st.selectbox("Model", sorted(verdicte), key="o6_model")
+        v = verdicte[ales]
+        rob, cost, sig = v["primary_robustness"], v["primary_clean_cost"], v["safety"]
+        c1_, c2_, c3_ = st.columns(3)
+        c1_.metric("Robustete (O6 vs C1)", f"{rob['improvement_over_c1_pp']:+.1f} pp",
+                   "TRECUT" if rob["passed"] else "PICAT",
+                   delta_color="normal" if rob["passed"] else "inverse")
+        c2_.metric("Cost pe trafic curat", f"-{max(cost['drop_vs_c1'], cost['drop_vs_o1']):.4f}",
+                   "TRECUT" if cost["passed"] else "PICAT",
+                   delta_color="normal" if cost["passed"] else "inverse")
+        c3_.metric(f"Cea mai afectata clasa ({sig['worst_class']})", f"{-sig['worst_drop']:+.3f}",
+                   "TRECUT" if sig["passed"] else "PICAT",
+                   delta_color="normal" if sig["passed"] else "inverse")
+        st.caption(f"Praguri: castig minim {rob['threshold_pp']:.0f} pp fata de C1, "
+                   f"scadere macro F1 cel mult {cost['threshold']}, "
+                   f"nicio clasa sub -{sig['threshold']}.")
+
+    # ---- generalizarea la familia exclusa din antrenare ----
+    loo = read_csv(config.ADVERSARIAL_DIR / "holdout_generalization.csv")
+    if loo is not None and not loo.empty:
+        st.subheader("Transfera invarianta la transformari nevazute?")
+        st.markdown(
+            "Bratul **O6-LOO** a fost antrenat **fara nicio varianta din familia TTL** si "
+            "este masurat tocmai pe ea. Daca ramane aproape de C1, modelul a memorat "
+            "transformarile, nu proprietatea care le face eficiente.")
+        loo = loo.copy()
+        loo["arm"] = loo["arm"].map(ARM_LABEL).fillna(loo["arm"])
+        loo.columns = ["Brat", "Evaziune pe familia TTL (%)", "min", "max", "repetari"]
+        st.dataframe(loo.round(2), width="stretch", hide_index=True)
+
+    # ---- figuri ----
+    for path in [config.FIGURES_DIR / "o6_cost_vs_robustness.png",
+                 config.FIGURES_DIR / "o6_evasion_curves_transformer.png"]:
+        if path.exists():
+            st.image(str(path), width="stretch")
+
+
 def main():
     st.title("Robustetea unui NIDS la modificari adversariale")
 
@@ -244,13 +332,16 @@ def main():
     settings = controls()
     st.caption(describe(settings))
 
-    result, flow, measurements = st.tabs(["Rezultat", "Un flux", "Masuratori"])
+    result, flow, measurements, adversarial = st.tabs(
+        ["Rezultat", "Un flux", "Masuratori", "Antrenare adversariala"])
     with result:
         view_result(models, data, settings)
     with flow:
         view_flow(models, data, settings)
     with measurements:
         view_measurements()
+    with adversarial:
+        view_adversarial()
 
 
 if __name__ == "__main__":

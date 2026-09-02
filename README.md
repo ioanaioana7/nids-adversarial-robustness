@@ -41,6 +41,10 @@ clasele de atac.
 - **O4.** Analiza sensibilității: corelarea ratei de evaziune cu importanța caracteristicilor
   afectate; distincția între cele trei rezultate posibile ale perturbării.
 - **O5.** Interfață de vizualizare și testare interactivă.
+- **O6.** Antrenare adversarială: contrapartida defensivă a lui O3 — dacă reantrenăm
+  pe trafic de atac perturbat, se închide diferența de evaziune și cu ce cost pe
+  traficul curat? Cu braț de control (C1), care izolează efectul perturbării de
+  efectul volumului de date.
 
 ## De ce UNSW-NB15 și modele bazate pe arbori
 
@@ -123,6 +127,18 @@ src/transformer/
 ui/                               # O5: interfata de vizualizare si testare interactiva
     app.py                         # aplicatia Streamlit (4 taburi)
     live_perturbation.py           # perturbare cu parametri arbitrari, pe primitivele O2
+
+train_adversarial.py              # O6: antrenare adversariala prin augmentare
+src/adversarial/
+    augment.py                     # esantionarea variantelor, seturile O6/C1, verificarile
+    weights.py                     # ponderile de clasa INGHETATE, comune tuturor bratelor
+    trees.py                       # reantrenarea RF/XGBoost per brat si seed
+    transformer_arm.py             # augmentare dinamica per epoca pentru retea
+    evaluation.py                  # cohorta comuna + matricile de rezultate per rand
+    report.py                      # tabele, figuri, verdictul fata de criteriile fixate
+    runner.py                      # orchestrare + manifest
+models/adversarial/                # modelele bratelor (nu se versioneaza, ~5GB)
+results/adversarial/               # manifest, metrici, cohorte, verdict
 ```
 
 ## Cerinte
@@ -186,9 +202,11 @@ radacina proiectului.
 | 4 | `python run_evasion.py` | ~5 min | pasii 1-3 | `results/evasion/` |
 | 5 | `python run_sensitivity.py` | ~8 min | pasii 1-4 | `results/sensitivity/` |
 | 6 | `python -m streamlit run ui/app.py` | interactiv | pasii 1-5 | interfata |
+| 7 | `python train_adversarial.py` | ~9 h | pasii 1-4 | `results/adversarial/` |
 
 Pasul 2 e optional daca vrei doar arborii; pasii 4-6 il vor sari automat.
-Pasii 3-6 **nu reantreneaza nimic** — incarca modelele inghetate.
+Pasii 3-6 **nu reantreneaza nimic** — incarca modelele inghetate. Pasul 7 antreneaza
+20 de modele noi, dar in `models/adversarial/`: nu atinge niciun artefact O1-O5.
 
 ### Detalii utile
 

@@ -1,0 +1,375 @@
+{
+  "objective": "O6 — antrenare adversariala prin augmentare",
+  "created_at": "2026-09-01T10:39:13.007160+00:00",
+  "random_seed": 42,
+  "k": 1,
+  "arms": {
+    "o1": {
+      "mode": "original",
+      "holdout": []
+    },
+    "c1": {
+      "mode": "duplicate",
+      "holdout": []
+    },
+    "o6": {
+      "mode": "perturbed",
+      "holdout": []
+    },
+    "o6_loo": {
+      "mode": "perturbed",
+      "holdout": [
+        "ttl_hold",
+        "ttl_mimic",
+        "combined_hold",
+        "combined_mimic"
+      ]
+    }
+  },
+  "seeds": {
+    "trees": [
+      42,
+      43,
+      44
+    ],
+    "transformer": [
+      42,
+      43,
+      44
+    ],
+    "holdout": [
+      42
+    ]
+  },
+  "generator_context": {
+    "training_context": {
+      "built_from": "train",
+      "check": {
+        "source_frames": [
+          175341
+        ],
+        "train_only": true
+      },
+      "ct_state_ttl_combinations": 32,
+      "why": "in O6 perturbarile devin date de antrenare, deci un lookup construit din test ar fi scurgere train/test"
+    },
+    "evaluation_context": {
+      "built_from": "train+test",
+      "ct_state_ttl_combinations": 58,
+      "why": "identic cu O3, ca variantele masurate sa fie aceleasi; modelele sunt inghetate cand se foloseste"
+    }
+  },
+  "split": {
+    "train_rows": 149039,
+    "val_rows": 26302,
+    "identical_to_baseline_split": true
+  },
+  "same_side_check": {
+    "source_ids": 149039,
+    "leaked": 0,
+    "outside_allowed_set": 0
+  },
+  "sampling": {
+    "scheme": "uniform_type_then_uniform_level",
+    "n_types": 7,
+    "n_variants": 26,
+    "p_per_type": {
+      "ttl_hold": 0.14285714285714285,
+      "ttl_mimic": 0.14285714285714285,
+      "padding": 0.14285714285714285,
+      "timing": 0.14285714285714285,
+      "connection_rate": 0.14285714285714285,
+      "combined_hold": 0.14285714285714285,
+      "combined_mimic": 0.14285714285714285
+    },
+    "p_per_variant": {
+      "ttl_hold_L1": 0.047619047619047616,
+      "ttl_hold_L2": 0.047619047619047616,
+      "ttl_hold_L3": 0.047619047619047616,
+      "ttl_mimic_L1": 0.047619047619047616,
+      "ttl_mimic_L2": 0.047619047619047616,
+      "ttl_mimic_L3": 0.047619047619047616,
+      "padding_L1": 0.03571428571428571,
+      "padding_L2": 0.03571428571428571,
+      "padding_L3": 0.03571428571428571,
+      "padding_L4": 0.03571428571428571,
+      "timing_L1": 0.03571428571428571,
+      "timing_L2": 0.03571428571428571,
+      "timing_L3": 0.03571428571428571,
+      "timing_L4": 0.03571428571428571,
+      "connection_rate_L1": 0.03571428571428571,
+      "connection_rate_L2": 0.03571428571428571,
+      "connection_rate_L3": 0.03571428571428571,
+      "connection_rate_L4": 0.03571428571428571,
+      "combined_hold_L1": 0.03571428571428571,
+      "combined_hold_L2": 0.03571428571428571,
+      "combined_hold_L3": 0.03571428571428571,
+      "combined_hold_L4": 0.03571428571428571,
+      "combined_mimic_L1": 0.03571428571428571,
+      "combined_mimic_L2": 0.03571428571428571,
+      "combined_mimic_L3": 0.03571428571428571,
+      "combined_mimic_L4": 0.03571428571428571
+    },
+    "ttl_touching_types": [
+      "ttl_hold",
+      "ttl_mimic",
+      "combined_hold",
+      "combined_mimic"
+    ],
+    "ttl_touching_mass": 0.571429
+  },
+  "sampling_holdout_arm": {
+    "scheme": "uniform_type_then_uniform_level",
+    "n_types": 3,
+    "n_variants": 12,
+    "p_per_type": {
+      "padding": 0.3333333333333333,
+      "timing": 0.3333333333333333,
+      "connection_rate": 0.3333333333333333
+    },
+    "p_per_variant": {
+      "padding_L1": 0.08333333333333333,
+      "padding_L2": 0.08333333333333333,
+      "padding_L3": 0.08333333333333333,
+      "padding_L4": 0.08333333333333333,
+      "timing_L1": 0.08333333333333333,
+      "timing_L2": 0.08333333333333333,
+      "timing_L3": 0.08333333333333333,
+      "timing_L4": 0.08333333333333333,
+      "connection_rate_L1": 0.08333333333333333,
+      "connection_rate_L2": 0.08333333333333333,
+      "connection_rate_L3": 0.08333333333333333,
+      "connection_rate_L4": 0.08333333333333333
+    },
+    "ttl_touching_types": [],
+    "ttl_touching_mass": 0.0
+  },
+  "frozen_class_weights": {
+    "trees": {
+      "computed_on": "etichetele train ORIGINALE (175.341 randuri)",
+      "weights": {
+        "Analysis": 8.76705,
+        "Backdoor": 10.042439862542956,
+        "DoS": 1.4297211350293542,
+        "Exploits": 0.5250831012487647,
+        "Fuzzers": 0.9642597888253409,
+        "Generic": 0.4383525,
+        "Normal": 0.3131089285714286,
+        "Reconnaissance": 1.6713468687446382,
+        "Shellcode": 15.475816416593116,
+        "Worms": 134.8776923076923
+      }
+    },
+    "transformer": {
+      "computed_on": "sub-setul de train ORIGINAL (85%, 149.039 randuri)",
+      "weights": {
+        "Analysis": 8.767,
+        "Backdoor": 10.043059299191375,
+        "DoS": 1.4297678434382195,
+        "Exploits": 0.5250810315670801,
+        "Fuzzers": 0.9642792443064182,
+        "Generic": 0.43835,
+        "Normal": 0.31310714285714286,
+        "Reconnaissance": 1.6714029382079174,
+        "Shellcode": 15.476531671858774,
+        "Worms": 134.26936936936937
+      }
+    },
+    "xgboost": "fara ponderi de clasa nici in O1; nimic de inghetat"
+  },
+  "datasets": {
+    "o1": {
+      "rows": 175341,
+      "rows_original": 175341,
+      "rows_added": 0,
+      "rows_normal": 56000,
+      "rows_attack": 119341,
+      "attack_to_normal_ratio": 2.131089,
+      "class_counts": {
+        "Normal": 56000,
+        "Generic": 40000,
+        "Exploits": 33393,
+        "Fuzzers": 18184,
+        "DoS": 12264,
+        "Reconnaissance": 10491,
+        "Analysis": 2000,
+        "Backdoor": 1746,
+        "Shellcode": 1133,
+        "Worms": 130
+      },
+      "class_prior": {
+        "Normal": 0.319378,
+        "Generic": 0.228127,
+        "Exploits": 0.190446,
+        "Fuzzers": 0.103706,
+        "DoS": 0.069944,
+        "Reconnaissance": 0.059832,
+        "Analysis": 0.011406,
+        "Backdoor": 0.009958,
+        "Shellcode": 0.006462,
+        "Worms": 0.000741
+      },
+      "variant_counts": {
+        "none": 175341
+      },
+      "fingerprint": "832f39f460d4229e6012be8fcf15b177c32727e33deb3a5407ffe2012f59c347",
+      "seconds": 2.02
+    },
+    "c1": {
+      "rows": 294682,
+      "rows_original": 175341,
+      "rows_added": 119341,
+      "rows_normal": 56000,
+      "rows_attack": 238682,
+      "attack_to_normal_ratio": 4.262179,
+      "class_counts": {
+        "Generic": 80000,
+        "Exploits": 66786,
+        "Normal": 56000,
+        "Fuzzers": 36368,
+        "DoS": 24528,
+        "Reconnaissance": 20982,
+        "Analysis": 4000,
+        "Backdoor": 3492,
+        "Shellcode": 2266,
+        "Worms": 260
+      },
+      "class_prior": {
+        "Generic": 0.271479,
+        "Exploits": 0.226638,
+        "Normal": 0.190035,
+        "Fuzzers": 0.123414,
+        "DoS": 0.083235,
+        "Reconnaissance": 0.071202,
+        "Analysis": 0.013574,
+        "Backdoor": 0.01185,
+        "Shellcode": 0.00769,
+        "Worms": 0.000882
+      },
+      "variant_counts": {
+        "none": 294682
+      },
+      "fingerprint": "8c95db83a772d46de602f7d49410ed7d7450f2626fbbe120281c991832b1fada",
+      "seconds": 3.39
+    },
+    "o6": {
+      "rows": 294682,
+      "rows_original": 175341,
+      "rows_added": 119341,
+      "rows_normal": 56000,
+      "rows_attack": 238682,
+      "attack_to_normal_ratio": 4.262179,
+      "class_counts": {
+        "Generic": 80000,
+        "Exploits": 66786,
+        "Normal": 56000,
+        "Fuzzers": 36368,
+        "DoS": 24528,
+        "Reconnaissance": 20982,
+        "Analysis": 4000,
+        "Backdoor": 3492,
+        "Shellcode": 2266,
+        "Worms": 260
+      },
+      "class_prior": {
+        "Generic": 0.271479,
+        "Exploits": 0.226638,
+        "Normal": 0.190035,
+        "Fuzzers": 0.123414,
+        "DoS": 0.083235,
+        "Reconnaissance": 0.071202,
+        "Analysis": 0.013574,
+        "Backdoor": 0.01185,
+        "Shellcode": 0.00769,
+        "Worms": 0.000882
+      },
+      "variant_counts": {
+        "none": 175341,
+        "ttl_mimic": 17169,
+        "padding": 17138,
+        "ttl_hold": 17084,
+        "connection_rate": 17024,
+        "timing": 16986,
+        "combined_mimic": 16976,
+        "combined_hold": 16964
+      },
+      "fingerprint": "0adc64549ec57d49906ae9d679580a1d711a3c2edc16d0a996093cd8c2207fbe",
+      "seconds": 3.86
+    },
+    "o6_loo": {
+      "rows": 294682,
+      "rows_original": 175341,
+      "rows_added": 119341,
+      "rows_normal": 56000,
+      "rows_attack": 238682,
+      "attack_to_normal_ratio": 4.262179,
+      "class_counts": {
+        "Generic": 80000,
+        "Exploits": 66786,
+        "Normal": 56000,
+        "Fuzzers": 36368,
+        "DoS": 24528,
+        "Reconnaissance": 20982,
+        "Analysis": 4000,
+        "Backdoor": 3492,
+        "Shellcode": 2266,
+        "Worms": 260
+      },
+      "class_prior": {
+        "Generic": 0.271479,
+        "Exploits": 0.226638,
+        "Normal": 0.190035,
+        "Fuzzers": 0.123414,
+        "DoS": 0.083235,
+        "Reconnaissance": 0.071202,
+        "Analysis": 0.013574,
+        "Backdoor": 0.01185,
+        "Shellcode": 0.00769,
+        "Worms": 0.000882
+      },
+      "variant_counts": {
+        "none": 175341,
+        "padding": 40000,
+        "timing": 39686,
+        "connection_rate": 39655
+      },
+      "fingerprint": "6a011a1b3d6127812797c4891c920e16030395b30801b61ef412e6575c95170b",
+      "seconds": 3.54
+    }
+  },
+  "dataset_sizes": {
+    "train": 175341,
+    "test": 82332
+  },
+  "preregistered_criteria": {
+    "primary_robustness": {
+      "class": "Generic",
+      "min_improvement_pp_over_c1": 10.0,
+      "measured_on": "cohorta comuna, medie peste seed-uri"
+    },
+    "primary_clean_cost": {
+      "max_macro_f1_drop": 0.02,
+      "measured_on": "setul de test oficial curat"
+    },
+    "safety": {
+      "max_per_class_f1_drop": 0.05
+    },
+    "stretch_target": {
+      "max_absolute_evasion_pct": 30.0,
+      "note": "tinta aspirationala, NU criteriu de trecere"
+    }
+  },
+  "non_goals": [
+    "atacuri pe gradient (FGSM/PGD/ZOO) — in afara modelului de amenintare",
+    "atacatori adaptivi care se reoptimizeaza impotriva modelului aparat",
+    "robustete dincolo de familia de perturbari O2"
+  ],
+  "library_versions": {
+    "python": "3.12.10",
+    "pandas": "3.0.5",
+    "numpy": "2.4.6",
+    "scikit_learn": "1.9.0",
+    "xgboost": "3.4.0",
+    "joblib": "1.5.3"
+  }
+}

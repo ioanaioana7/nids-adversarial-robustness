@@ -232,6 +232,59 @@ SENSITIVITY_TOP_FEATURES = 20         # cate se afiseaza in figuri
 SENSITIVITY_DIVERGENCE_CLASS = "Generic"
 
 # --------------------------------------------------------------------------
+# O6 — antrenare adversariala (aparare)
+# --------------------------------------------------------------------------
+# Contrapartida defensiva a lui O3: daca reantrenam pe trafic de atac perturbat,
+# se inchide diferenta de evaziune si cu ce cost pe traficul curat?
+#
+# Augmentare, NU atac pe gradient (FGSM/PGD): gradientul cere un acces pe care
+# atacatorul din modelul de amenintare nu il are si produce vectori de features
+# fizic nerealizabili. Vezi src/transformer/predictor.py:logits_with_grad.
+
+# Cate copii perturbate se adauga per flux de atac. N + k*A randuri, NU 2N:
+# cu N=175.341 si A=119.341, k=1 da ~294.682 de randuri (1,68x).
+# k mic si marginit, deliberat: la k=4-8 raportul atac/Normal se schimba
+# drastic si RF-ul devine o problema de memorie.
+O6_K = 1
+
+# Bratele experimentului. Rezultatul aparabil e castigul lui o6 fata de C1,
+# nu fata de O1: C1 adauga exact acelasi numar de randuri de atac, dar
+# NEPERTURBATE, deci izoleaza "mai multe date de atac" de "date perturbate".
+O6_ARM_BASELINE = "o1"        # date originale
+O6_ARM_CONTROL = "c1"         # original + duplicate neperturbate (control)
+O6_ARM_DEFENDED = "o6"        # original + copii perturbate (aparerea)
+O6_ARM_HOLDOUT = "o6_loo"     # ca o6, dar cu o familie de perturbari exclusa
+O6_ARMS = [O6_ARM_BASELINE, O6_ARM_CONTROL, O6_ARM_DEFENDED]
+
+# Mai multe seed-uri: cu un singur seed nu se poate distinge un castig real de
+# zgomotul de initializare, mai ales la retea.
+O6_TREE_SEEDS = [42, 43, 44]
+O6_TRANSFORMER_SEEDS = [42, 43, 44]
+O6_HOLDOUT_SEEDS = [42]
+
+# Bratul de generalizare: familia TTL (cea dominanta in O3) e scoasa complet din
+# augmentare, iar evaziunea se masoara tocmai pe ea. Robustetea pe un tip
+# NEVAZUT la antrenare e o dovada mult mai tare decat pe unul vazut.
+O6_HOLDOUT_TYPES = ["ttl_hold", "ttl_mimic", "combined_hold", "combined_mimic"]
+O6_RUN_HOLDOUT = True
+
+# Distributia de esantionare a variantelor: uniforma peste tipurile realizabile,
+# apoi uniforma peste nivelurile tipului ales. Deliberat NU ponderata dupa
+# ratele masurate in O3 — a pondera dupa exact marimea pe care o masuram ulterior
+# ar inclina evaluarea in favoarea apararii.
+O6_SAMPLING = "uniform_type_then_uniform_level"
+
+# Criterii pre-inregistrate (fixate INAINTE de rulare, in manifest).
+# Bara de trecere e imbunatatirea RELATIVA fata de C1, nu un prag absolut:
+# o scadere de la 97% la 45% ar fi un rezultat valoros pe care un prag dur de
+# "<=30%" l-ar marca gresit drept esec.
+O6_CRITERION_CLASS = "Generic"                 # clasa unde O3 a gasit divergenta maxima
+O6_CRITERION_MIN_EVASION_DROP_PP = 10.0        # puncte procentuale, o6 vs c1
+O6_CRITERION_MAX_MACRO_F1_DROP = 0.02          # cost admis pe traficul curat
+O6_CRITERION_MAX_PER_CLASS_F1_DROP = 0.05      # nicio clasa nu are voie sa cada mai mult
+O6_STRETCH_EVASION_ABS = 30.0                  # tinta aspirationala, nu criteriu
+
+# --------------------------------------------------------------------------
 # Directoare de iesire
 # --------------------------------------------------------------------------
 RESULTS_DIR = PROJECT_ROOT / "results"
@@ -269,9 +322,16 @@ TRANSFORMER_METADATA_PATH = RESULTS_DIR / "transformer_experiment_metadata.json"
 TRANSFORMER_PREDICTIONS_PATH = PREDICTIONS_DIR / "transformer_predictions.csv"
 TRANSFORMER_ELIGIBLE_FLAGS_PATH = PERTURBATION_DIR / "eligible_flags_transformer.csv"
 
+ADVERSARIAL_DIR = RESULTS_DIR / "adversarial"
+ADVERSARIAL_MODELS_DIR = MODELS_DIR / "adversarial"
+ADVERSARIAL_LOG_PATH = ADVERSARIAL_DIR / "adversarial.log"
+O6_MANIFEST_PATH = ADVERSARIAL_DIR / "o6_manifest.json"
+O6_PROVENANCE_DIR = ADVERSARIAL_DIR / "provenance"
+
 OUTPUT_DIRECTORIES = [
     MODELS_DIR, FIGURES_DIR, METRICS_DIR,
     FEATURE_IMPORTANCE_DIR, EDA_DIR, PREDICTIONS_DIR,
     PERTURBATION_DIR, PERTURBATION_SAMPLES_DIR,
     EVASION_DIR, EVASION_PER_ROW_DIR, SENSITIVITY_DIR,
+    ADVERSARIAL_DIR, ADVERSARIAL_MODELS_DIR, O6_PROVENANCE_DIR,
 ]

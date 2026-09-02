@@ -1,0 +1,20 @@
+{
+  "RandomForest|o1|42": {
+    "checked": true,
+    "rows": 82332,
+    "mismatches": 0,
+    "identical": true
+  },
+  "XGBoost|o1|42": {
+    "checked": true,
+    "rows": 82332,
+    "mismatches": 0,
+    "identical": true
+  },
+  "Transformer|o1|42": {
+    "checked": true,
+    "rows": 82332,
+    "mismatches": 0,
+    "identical": true
+  }
+}

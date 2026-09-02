@@ -2,43 +2,117 @@
 
 \pagestyle{fancy}
 
+În acest capitol se sintetizează principalele direcții de cercetare relevante pentru această lucrare, concentrându-se asupra aplicării metodelor de învățare automată în detecția intruziunilor de rețea și asupra robusteții acestora la perturbări adversariale. În prima parte sunt examinate seturile de date folosite pentru antrenarea și evaluarea sistemelor de detecție, evidențiindu-se caracteristicile și limitările lor în raport cu obiectivele studiului. Ulterior, sunt analizate principalele modele de clasificare utilizate în literatura de specialitate, de la algoritmi clasici destinați datelor tabulare până la arhitecturi neuronale bazate pe transformere. Capitolul abordează apoi atacurile adversariale îndreptate împotriva sistemelor de detecție a intruziunilor, acordând o atenție deosebită distincției dintre perturbările operate la nivelul caracteristicilor și modificările care pot fi implementate efectiv în traficul de rețea. În continuare, sunt prezentate mecanismele de apărare, cu accent pe antrenarea adversarială și pe proiectarea unor condiții experimentale care să permită atribuirea efectelor observate perturbărilor introduse, nu simplei creșteri a volumului de date. Pe baza acestor elemente, secțiunea finală poziționează contribuția lucrării în raport cu cercetările existente.
 
-{\color{blue}\noindent Acest capitol se va extinde pe de la 3 la 10 pagini.\\}
+\section{Seturi de date pentru detecția intruziunilor}\label{sec:seturi-date}
 
-Documentarea bibliografică are ca obiectiv prezentarea stadiului actual al domeniului sau sub-domeniului în care se situează tema.
-În redactarea acestui capitol (în general a întregului document) se va ține cont de cunoștințele acumulate la disciplinele dedicate din semestrul 2, anul 4
-(Metodologia Întocmirii Proiectelor, etc.), precum și la celelalte discipline relevante temei abordate.
+Progresul în domeniul detecției intruziunilor bazate pe învățare automată depinde în mare măsură de disponibilitatea unor seturi de date reprezentative, care să includă atât trafic benign, cât și mai multe categorii de atac etichetate corespunzător. Ring et al.~\cite{ring2019survey} oferă o analiză amplă a seturilor de date utilizate în detecția intruziunilor bazate pe rețea și evidențiază criterii precum modul de generare a traficului, formatul datelor, diversitatea atacurilor, disponibilitatea etichetelor și actualitatea acestora. Aceeași lucrare arată că multe dintre seturile de date mai vechi prezintă limitări care le reduc relevanța pentru evaluarea sistemelor destinate rețelelor actuale.
+
+KDD CUP 99, împreună cu versiunea sa revizuită NSL-KDD, a fost utilizat pe scară largă în cercetarea privind detecția intruziunilor. Tavallaee et al.~\cite{tavallaee2009kdd} au evidențiat însă probleme importante ale setului KDD CUP 99, în special numărul mare de înregistrări redundante, care poate influența evaluarea performanței clasificatoarelor. NSL-KDD a fost propus pentru a reduce o parte dintre aceste probleme prin eliminarea înregistrărilor redundante. Deși cele două seturi de date rămân utile ca repere pentru compararea metodelor, vechimea traficului și a scenariilor de atac pe care le reprezintă limitează relevanța lor pentru evaluarea sistemelor destinate rețelelor actuale.
+
+Setul de date UNSW-NB15, introdus de Moustafa și Slay~\cite{moustafa2015unsw}, a fost generat într-un mediu controlat și combină activități normale cu scenarii sintetice de atac. Acesta conține nouă categorii de atac și pune la dispoziție atât capturi de trafic, cât și caracteristici extrase la nivel de flux, fiind potrivit pentru experimente de clasificare multi-clasă. CIC-IDS-2017~\cite{sharafaldin2018cicids} a fost construit ulterior într-un mediu de test controlat, în care au fost definite profiluri pentru generarea traficului benign și au fost executate mai multe scenarii de atac, printre care atacuri DoS și DDoS, brute force, infiltrare și atacuri asupra aplicațiilor web.
+
+Popularitatea unui set de date nu garantează însă corectitudinea completă a acestuia. Liu et al.~\cite{liu2022error} au realizat un studiu critic asupra seturilor CIC-IDS-2017 și CSE-CIC-IDS-2018 și au identificat probleme în mai multe etape ale procesului de creare a datelor, inclusiv în orchestrarea atacurilor, generarea caracteristicilor, documentație și etichetare. Prezența unor astfel de erori poate influența rezultatele experimentale și, implicit, validitatea concluziilor studiilor care utilizează aceste seturi de date. Din acest motiv, alegerea setului de date și cunoașterea limitărilor sale reprezintă o parte importantă a metodologiei de evaluare.
+
+Tabelul următor prezintă o comparație între principalele seturi de date discutate.
+
+\begin{table}[!ht]
+\caption{Comparație a principalelor seturi de date utilizate pentru detecția intruziunilor. Pentru KDD CUP 99 și NSL-KDD sunt prezentate cele patru familii principale de atac, iar pentru celelalte seturi este indicat numărul de categorii sau etichete de atac distincte, fără clasa de trafic benign. Referințele indică lucrarea care a introdus setul, cu excepția ultimului rând, unde este indicată analiza critică citată mai jos, setul nefiind însoțit de o lucrare proprie de prezentare.}
+\centering
+
+\begin{tabular}{lccc}
+\hline
+\textbf{Set de date} & \textbf{An} & \textbf{Categorii de atac} & \textbf{Referință} \\
+\hline
+KDD CUP 99       & 1999 & 4  & \cite{tavallaee2009kdd} \\
+NSL-KDD          & 2009 & 4  & \cite{tavallaee2009kdd} \\
+UNSW-NB15        & 2015 & 9  & \cite{moustafa2015unsw} \\
+CIC-IDS-2017     & 2017 & 14 & \cite{sharafaldin2018cicids} \\
+CSE-CIC-IDS-2018 & 2018 & 14 & \cite{liu2022error} \\
+\hline
+\end{tabular}
+
+\label{tab:seturi-date}
+\end{table}
+
+Numărul de categorii prezentat în Tabelul~\ref{tab:seturi-date} trebuie interpretat în funcție de modul în care fiecare set de date își organizează atacurile. KDD CUP 99 și NSL-KDD grupează atacurile în patru familii principale: DoS, Probe, R2L și U2R. UNSW-NB15 definește nouă categorii de atac, printre care Fuzzers, Exploits, Reconnaissance și Worms. În cazul CIC-IDS-2017 și CSE-CIC-IDS-2018, sunt disponibile etichete mai detaliate pentru diferitele tipuri de atac, care pot fi ulterior reunite în categorii mai generale, în funcție de modul în care este formulată problema de clasificare. Prin urmare, numărul de clase utilizate efectiv de un model multi-clasă depinde și de etapa de preprocesare și de nivelul de agregare ales.
+
+\section{Modele de clasificare pentru sistemele de detecție a intruziunilor}\label{sec:modele}
+
+Odată ales un set de date, următorul pas constă în alegerea și antrenarea unui model de clasificare capabil să distingă traficul benign de diferitele categorii de atac. Literatura propune o gamă largă de abordări, de la modele clasice, potrivite pentru date tabulare, până la arhitecturi neuronale profunde.
+
+\subsection{Modele clasice și ansambluri de arbori}\label{subsec:clasice}
+
+O parte importantă a cercetării aplicate utilizează algoritmi clasici de învățare automată pe caracteristici extrase la nivel de flux. Agarwal et al.~\cite{agarwal2021classification} compară mai multe modele de clasificare pentru detecția intruziunilor și evidențiază compromisul dintre performanță și complexitatea computațională. Modelele de tip ansamblu de arbori, precum Random Forest și Gradient Boosting, sunt frecvent utilizate pentru date de trafic tabulare și pot oferi atât performanțe bune, cât și posibilitatea analizării importanței caracteristicilor. Alhameed et al.~\cite{alhameed2025enhancing} analizează, de asemenea, performanța unor astfel de modele în contextul sistemelor de detecție a intruziunilor.
+
+O direcție complementară o reprezintă clasificarea ierarhică. Uddin et al.~\cite{uddin2024hierarchical} propun un model organizat pe mai multe niveluri, în care traficul este separat inițial în benign și malițios, iar instanțele identificate ca malițioase sunt clasificate ulterior în categorii de atac mai specifice. O astfel de abordare poate fi utilă în cazul seturilor de date dezechilibrate, în care distribuția neuniformă a exemplelor între clase poate afecta capacitatea modelului de a identifica în mod corespunzător categoriile slab reprezentate.
+
+\subsection{Rețele neuronale și arhitecturi de tip transformer}\label{subsec:neuronale}
+
+Pe măsură ce volumul și complexitatea datelor au crescut, cercetarea s-a orientat și către utilizarea rețelelor neuronale profunde. Un moment important în dezvoltarea acestui domeniu îl reprezintă introducerea arhitecturii transformer de către Vaswani et al.~\cite{vaswani2017attention}. Aceasta se bazează pe mecanismul de auto-atenție (\textit{self-attention}), care permite modelarea relațiilor dintre elementele unei secvențe fără utilizarea recurenței. Deși arhitectura a fost propusă inițial pentru procesarea limbajului natural, ulterior au fost dezvoltate adaptări și pentru analiza traficului de rețea.
+
+Wu et al.~\cite{wu2022rtids} propun RTIDS, un sistem de detecție a intruziunilor bazat pe transformer, conceput pentru a îmbunătăți reprezentarea caracteristicilor și clasificarea în condițiile unor seturi de date dezechilibrate. Manocchio et al.~\cite{manocchio2024flowtransformer} introduc FlowTransformer, un cadru modular pentru aplicarea și compararea diferitelor arhitecturi de tip transformer asupra datelor de trafic la nivel de flux. În aceeași direcție, Ullah et al.~\cite{ullah2024idsint} propun IDS-INT, o abordare care combină arhitectura transformer cu tehnici de învățare prin transfer pentru detecția intruziunilor.
+
+Cu toate acestea, utilizarea rețelelor neuronale profunde nu implică automat rezultate superioare față de modelele clasice pentru orice set de date. În cazul datelor tabulare, modelele de tip ansamblu de arbori pot rămâne competitive, oferind în același timp costuri de antrenare mai reduse și o interpretare mai directă a importanței caracteristicilor. Din acest motiv, în lucrarea de față este utilizat un model de tip ansamblu de arbori drept clasificator de referință, alegerea fiind justificată atât de adecvarea acestuia pentru date tabulare, cât și de posibilitatea analizării caracteristicilor care influențează decizia modelului.
 
 
-Referințele se scriu în secțiunea Bibliografie.
+\section{Atacuri adversariale asupra sistemelor de detecție a intruziunilor}\label{sec:adversarial}
 
-Formatul referințelor trebuie să fie de tipul IEEE sau asemănător.
+Un sistem de detecție poate obține rezultate foarte bune într-un mediu controlat și totuși să fie vulnerabil atunci când un atacator încearcă în mod intenționat să îi influențeze deciziile. În domeniul procesării imaginilor, Szegedy et al.~\cite{szegedy2014intriguing} au observat că perturbări foarte mici ale datelor de intrare pot determina clasificări eronate, iar Goodfellow et al.~\cite{goodfellow2015explaining} au arătat ulterior că asemenea perturbări pot fi construite eficient pe baza gradientului modelului. În cazul traficului de rețea, aplicarea aceleiași idei este mai dificilă, deoarece modificările trebuie să respecte și proprietățile specifice traficului și să nu compromită funcționalitatea atacului.
 
-Introducerea și formatarea referințelor în bibliografie, respectiv citarea în text, se pot face manual sau folosind instrumentele de lucru menționate în ultimele paragrafe din acest capitol.
+He et al.~\cite{he2023adversarial} și Alotaibi și Rassam~\cite{alotaibi2023adversarial} analizează pe larg atacurile adversariale împotriva sistemelor de detecție a intruziunilor. O problemă importantă în acest domeniu este diferența dintre modificarea directă a caracteristicilor utilizate de clasificator și modificarea traficului din care aceste caracteristici sunt extrase. În primul caz, valorile unui vector de caracteristici pot fi perturbate numeric pentru a determina modelul să greșească. Totuși, un astfel de vector nu corespunde în mod necesar unui trafic de rețea care poate fi generat în practică. Din acest motiv, atacurile mai apropiate de un scenariu real trebuie să țină cont de relațiile dintre caracteristici, de constrângerile protocoalelor și de păstrarea funcționalității traficului malițios.
 
-Recomandăm gestiunea referințelor folosind \href{https://www.jabref.org/}{JabRef} care se poate descărca de la \url{https://www.jabref.org/#download}
+Zhang et al.~\cite{zhang2022adversarial} studiază robustețea unor sisteme NIDS bazate pe rețele neuronale și propun cadrul TIKI-TAKA pentru evaluarea atacurilor adversariale și a unor mecanisme de apărare. Autorii aplică perturbări unui subset de caracteristici ale fluxurilor, în special caracteristici asociate temporizării, și impun constrângeri pentru ca modificările să nu altereze semantica și funcționalitatea fluxului. Rezultatele lor arată că și modificarea unui număr limitat de caracteristici poate reduce capacitatea de detecție a modelului.
 
-Forma referințelor bibliografice pe categorii de referințe o puteți găsi \href{https://libguides.nps.edu/citation/ieee-bibtex}{aici}.
+O abordare mai apropiată de modificarea efectivă a traficului este propusă de Sharon et al.~\cite{sharon2022tantra} prin TANTRA. Metoda modifică intervalele de timp dintre pachetele traficului malițios astfel încât comportamentul temporal al acestuia să semene cu cel al traficului benign. Conținutul pachetelor nu este modificat, ceea ce permite păstrarea funcționalității atacului. Autorii evaluează metoda pe mai multe tipuri de atac și sisteme NIDS și arată că modificarea temporizării poate conduce la rate ridicate de evaziune.
 
-Despre erori comune de formatare ale referințelor din bibliotecile online puteți citi \href{https://www.ece.ucdavis.edu/~jowens/biberrors.html}{aici}
+Tan et al.~\cite{tan2022sneaking} analizează problema într-un scenariu de trafic live, în care atacatorul poate modifica din mers doar pachetele pe care le transmite. Autorii definesc mai mulți operatori de mutație la nivel de pachet și utilizează o metodă bazată pe \textit{deep reinforcement learning} pentru a selecta modificările care favorizează evitarea detecției. Spre deosebire de abordările care operează exclusiv asupra caracteristicilor unui set de date offline, această metodă urmărește realizarea perturbărilor direct asupra traficului transmis.
 
-
-In capitolul~\ref{ch:analysis} din~\cite{strunk}, care tratează valoarea honeypots, Spitzner prezintă avantajele și dezavantajele acestor sisteme.
-
-
-În secțiunea \textit{Bibliografie} sunt exemple de referințe pentru articol la conferințe sau seminarii~\cite{BellucciLZ04}, articol în jurnal~\cite{AntoniouSBDB07},
-sau cărți~\cite{russell1995artificial}.
+Lucrarea de față pornește de la aceeași idee generală, conform căreia evaluarea robusteței unui NIDS trebuie să țină cont de perturbări care au o corespondență la nivelul traficului. Sunt analizate modificări ale valorii TTL, ale dimensiunii pachetelor prin adăugarea de octeți de umplutură și ale caracteristicilor asociate temporizării. Utilizarea câmpului TTL pentru evaziunea sistemelor NIDS este documentată în analiza de securitate a protocolului IPv4 realizată de Gont~\cite{gont2011rfc6274}. În ceea ce privește modificarea dimensiunii pachetelor, Okada et al.~\cite{okada2025xai} implementează în spațiul traficului o perturbare bazată pe adăugarea de padding pachetelor SYN și ACK și verifică experimental păstrarea caracterului malițios al comunicației. Aceste rezultate susțin utilizarea TTL-ului și a padding-ului ca puncte de plecare pentru perturbări cu interpretare la nivelul traficului, fără a implica faptul că orice valoare sau intensitate a modificării este validă. Scopul experimentelor din această lucrare este de a observa în ce măsură transformările analizate modifică valorile caracteristicilor extrase și influențează decizia clasificatorului, în condițiile păstrării funcționalității traficului malițios.
 
 
-Referințele spre aplicații sau resurse online (pagini de internet) trebuie sa includă cel puțin o denumire sugestivă pe lâ ngă link-ul propriu-zis~\cite{webpage},
-plus alte informații dacă sunt disponibile (autori, an, etc.).
-Referințele care prezintă doar link spre resursa online se vor plasa în subsolul paginii unde sunt referite.
-Citarea referințelor în text este obligatorie, vezi exemplul de mai jos (în funcție de tema proiectului se poate varia modul de prezentare a metodei/aplicației).
+\section{Mecanisme de apărare și antrenarea adversarială}\label{sec:aparare}
 
-%În articolul~\cite{AntoniouSBDB07} autorii prezintă un sistem pentru ...
-În~\cite{AntoniouSBDB07} autorii prezintă un sistem pentru detecția obstacolelor în mișcare folosind stereo viziune și estimarea mișcării proprii.
-Metoda se bazează pe ...{\it trecerea în revistă a algoritmilor, structurilor de date, funcționalitate, aspecte specifice temei proiectului etc}. Discuție {\it avantaje - dezavantaje}.
+Dacă traficul malițios poate fi modificat astfel încât să nu mai fie recunoscut, întrebarea care urmează firesc este dacă sistemul de detecție poate fi făcut să reziste unor astfel de modificări. Analizele de ansamblu ale domeniului~\cite{he2023adversarial, alotaibi2023adversarial} tratează contramăsurile alături de atacuri și lasă să se distingă patru direcții, care se separă după momentul în care intervin.
+
+Două dintre ele acționează asupra modelului însuși, înaintea punerii lui în funcțiune. Prima introduce exemple perturbate chiar în datele de antrenare, urmărind ca decizia să nu se mai sprijine pe proprietăți care pot fi schimbate. A doua elimină deliberat caracteristicile ușor de manipulat și acceptă o pierdere de performanță pe trafic nemodificat în schimbul unei dependențe mai reduse de informație aflată la îndemâna atacatorului. Celelalte două intervin la momentul deciziei: una încearcă recunoașterea intrărilor construite adversarial înainte ca ele să ajungă la clasificator, cealaltă pune mai multe modele să decidă împreună, mizând pe faptul că o perturbare eficientă împotriva unuia nu va fi la fel de eficientă împotriva tuturor.
+
+Zhang et al.~\cite{zhang2022adversarial} evaluează experimental contramăsuri din aceste categorii în cadrul TIKI-TAKA, alături de atacurile împotriva cărora sunt testate.
+
+\subsection{Antrenarea adversarială și cele două variante ale ei}\label{subsec:antrenare-adv}
+
+Ideea antrenării adversariale este directă: dacă modelul vede în timpul antrenării nu doar fluxurile originale, ci și variante modificate ale acestora, etichetate în continuare drept malițioase, atunci este împins să identifice atacul pe baza proprietăților care rămân neschimbate, nu pe baza celor care se pot modifica. Goodfellow et al.~\cite{goodfellow2015explaining} au propus această procedură ca formă de regularizare, în aceeași lucrare în care au introdus metoda de generare a exemplelor adversariale prin gradient.
+
+Literatura ulterioară a dezvoltat două variante distincte, care diferă prin modul de obținere a exemplelor adăugate. În prima, exemplele sunt generate folosind informația de gradient a modelului aflat în curs de antrenare, ceea ce le face specifice acelui model și le permite să urmărească granița de decizie pe măsură ce aceasta se deplasează. Formularea de referință a acestei variante aparține lui Madry et al.~\cite{madry2018towards}, care o enunță ca problemă de optimizare min-max, în care exemplele adăugate sunt cele care maximizează pierderea în vecinătatea fiecărei observații. În a doua, exemplele provin dintr-un set fix de transformări definite în prealabil, aplicate datelor de antrenare independent de reacția modelului, procedeu apropiat de augmentarea utilizată în mod obișnuit pentru date de imagine sau de text.
+
+În contextul acestei lucrări, este aleasă a doua variantă, deoarece se potrivește mai bine atât modelului de amenințare, cât și cadrului experimental. Perturbările evaluate sunt construite fără acces la parametrii sau la predicțiile clasificatorului. Prin urmare, utilizarea la antrenare a unor exemple generate pe baza gradientului ar introduce un nivel de acces diferit de cel presupus pentru atacator. În plus, o asemenea metodă nu poate fi aplicată în mod uniform celor trei clasificatoare analizate: rețeaua neuronală permite calcularea directă a gradientului în raport cu intrarea, în timp ce ansamblurile de arbori ar necesita proceduri distincte de aproximare sau metode specializate. În aceste condiții, rezultatele nu ar mai reflecta aceeași strategie de apărare pentru toate modelele.
+
+Un motiv suplimentar îl constituie realizabilitatea perturbărilor. Modificarea directă a vectorului de caracteristici în direcția gradientului nu garantează existența unui flux de rețea care să producă valorile rezultate și poate încălca relațiile dintre caracteristici. În schimb, transformările definite în această lucrare pornesc de la operații aplicabile traficului și păstrează eticheta semantică a fluxului. Din acest motiv, antrenarea adversarială este implementată aici prin augmentarea setului de antrenare cu exemple obținute folosind aceleași tipuri de transformări realizabile considerate în evaluare. Alegerea este consecventă cu excluderea atacurilor bazate pe gradient, discutată în secțiunea~\ref{sec:adversarial}.
 
 
-\textit{De exemplu:} În capitolul numit "Problem-solving" din lucrarea~\cite{russell1995artificial} se prezintă ...
+\subsection{Factori de confuzie în evaluarea antrenării adversariale}
+\label{subsec:control-lipsa}
 
+Eficiența antrenării adversariale este evaluată, în mod obișnuit, prin compararea unui model antrenat standard cu un model antrenat și pe exemple perturbate. O reducere a ratei de evaziune indică o îmbunătățire a robusteții, dar nu permite, singură, atribuirea acesteia caracterului adversarial al exemplelor adăugate. Cele două proceduri de antrenare diferă și prin compoziția setului de date, nu doar prin prezența perturbărilor.
+
+Prin adăugarea copiilor perturbate crește atât numărul total de exemple, cât și numărul observațiilor din clasa malițioasă. Modelul poate beneficia astfel de expunerea repetată la exemple de atac sau de modificarea distribuției claselor, chiar dacă noile observații nu conțin informație relevantă despre perturbările evaluate. În plus, atunci când ponderile claselor sunt determinate automat din frecvențele din setul de antrenare, augmentarea le poate modifica și, implicit, poate schimba importanța acordată erorilor fiecărei clase. Compararea exclusivă cu modelul antrenat pe setul inițial nu separă efectul perturbărilor de aceste efecte asociate augmentării.
+
+O dificultate suplimentară apare atunci când rata de evaziune este calculată numai pentru fluxurile malițioase detectate corect înainte de perturbare. Dacă această selecție este realizată separat pentru fiecare model, rata obținută se bazează de fiecare dată pe un alt set de fluxuri. Diferențele dintre valori pot proveni astfel atât din robustețea modelelor la perturbare, cât și din diferențele dintre fluxurile incluse în calcul. Pentru a permite o comparație directă, setul de fluxuri utilizat la evaluare trebuie stabilit o singură dată și păstrat identic pentru toate variantele de antrenare.
+
+Astfel, se compară trei variante: modelul de referință, un model de control și modelul antrenat adversarial. Modelul de control primește același număr suplimentar de exemple malițioase ca modelul antrenat adversarial, însă exemplele respective nu sunt perturbate. Compararea sa cu modelul de referință permite observarea efectelor produse de simpla suplimentare a datelor, iar compararea sa cu modelul antrenat adversarial evidențiază contribuția transformărilor aplicate exemplelor. Ratele de evaziune ale celor trei variante sunt calculate pe același set de fluxuri, stabilit conform protocolului experimental.
+
+\section{Poziționarea lucrării}\label{sec:pozitionare}
+
+Lucrările analizate arată că atacurile adversariale asupra sistemelor de detecție a intruziunilor pot fi realizate atât prin modificarea directă a caracteristicilor utilizate de model, cât și prin transformări aplicate asupra traficului propriu-zis \cite{he2023adversarial, alotaibi2023adversarial}. Pentru ca un astfel de atac să fie relevant într-un scenariu practic, modificările trebuie să influențeze decizia clasificatorului fără a împiedica traficul malițios să își îndeplinească scopul.
+
+În cazul unui clasificator multi-clasă, efectul unei perturbări poate fi analizat mai detaliat decât prin simpla verificare a corectitudinii predicției. Un atac perturbat poate rămâne în categoria corectă, poate fi clasificat drept trafic benign sau poate fi atribuit unei alte categorii de atac. Din perspectiva securității, clasificarea drept trafic benign este situația cea mai importantă, deoarece traficul malițios nu mai este identificat ca atare de sistemul de detecție. Confuzia cu o altă categorie reprezintă, de asemenea, o eroare de clasificare, însă traficul continuă să fie identificat drept malițios. În această lucrare, cele două situații sunt analizate separat pentru a oferi o imagine mai completă asupra efectului perturbărilor asupra clasificatorului.
+
+Un alt aspect important este modul în care sunt generate perturbările. TANTRA~\cite{sharon2022tantra} arată că modificarea temporizării pachetelor poate fi utilizată pentru evaziune fără modificarea conținutului acestora, iar Tan et al.~\cite{tan2022sneaking} studiază atacuri în care modificările sunt aplicate direct asupra traficului transmis. Aceste rezultate susțin evaluarea robusteței prin transformări care au o corespondență la nivelul traficului, în locul modificării arbitrare a valorilor din vectorul de caracteristici.
+
+Pornind de la această idee, lucrarea de față compară mai multe tipuri de perturbări aplicate traficului malițios și urmărește efectul acestora la diferite niveluri de intensitate. Pentru fiecare configurație este măsurată proporția exemplelor care ajung să fie clasificate drept trafic benign și sunt analizate separat cazurile în care atacul este atribuit unei alte categorii. În acest mod poate fi observat nu doar dacă modelul greșește, ci și natura erorilor produse de fiecare tip de perturbare.
+
+În plus, rezultatele sunt analizate în raport cu importanța caracteristicilor utilizate de clasificator. Scopul acestei analize este de a observa dacă transformările care afectează caracteristici cu o contribuție mai mare la decizia modelului produc și schimbări mai importante ale rezultatului clasificării. Importanța caracteristicilor este utilizată astfel ca instrument de interpretare a comportamentului modelului, nu ca o măsură directă a vulnerabilității acestuia.
+
+Evaluarea include și efectul antrenării pe exemple perturbate. Modelele sunt reantrenate folosind variante ale fluxurilor malițioase obținute prin aceleași transformări utilizate în testele de robustețe. Pentru a distinge efectul acestor transformări de cel produs de simpla suplimentare a datelor, modelul antrenat adversarial este comparat cu un model de control care primește același număr de exemple malițioase, însă în forma lor neperturbată. Ratele de evaziune sunt calculate pe același set de fluxuri pentru toate variantele comparate, conform criteriilor prezentate în subsecțiunea~\ref{subsec:control-lipsa}.
+
+Pe această bază, lucrarea urmărește trei direcții principale: evaluarea mai multor tipuri de perturbări realizabile ale traficului la diferite niveluri de intensitate, diferențierea evaziunii către clasa benignă de confuzia dintre categoriile de atac și evaluarea efectului antrenării pe exemple perturbate în raport cu un model de control. Analiza este completată prin examinarea importanței caracteristicilor afectate și prin dezvoltarea unui instrument interactiv pentru explorarea predicțiilor în diferite condiții de perturbare.

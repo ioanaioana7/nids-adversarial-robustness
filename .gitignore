@@ -41,3 +41,11 @@ Lucrare/*.out
 Lucrare/*.toc
 Lucrare/*.synctex.gz
 Lucrare/licenta.pdf
+
+# O6: modelele bratelor (20 fisiere, ~5GB) si artefactele voluminoase.
+# Regenerabile determinist cu `python train_adversarial.py`; manifestul,
+# tabelele agregate, verdictul si figurile raman versionate.
+models/adversarial/
+results/adversarial/outcomes/
+results/adversarial/provenance/
+results/adversarial/adversarial*.log
