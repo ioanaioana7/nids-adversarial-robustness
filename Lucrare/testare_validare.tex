@@ -849,7 +849,9 @@ Contrastul dintre coloane este rezultatul central al acestei subsecțiuni. În g
 
 Constatarea trebuie însă calificată, pentru că modul în care s-a produs invarianța nu este cel pe care l-am dori. Caracteristica pe care toate cele trei modele apărate ajung să se sprijine preponderent este TTL-ul de răspuns, cu ponderi de 36,4\,\%, 50,2\,\% și 81,6\,\% din importanța totală. Este tot o valoare TTL, deci tot artefactul de captură descris în subsecțiunea~\ref{subsec:artefact}, doar că unul generat de victimă, pe care atacatorul nu îl atinge în modelul de amenințare adoptat. Apărarea nu a împins modelele către proprietăți de fond ale atacurilor, ci de pe un artefact accesibil pe unul inaccesibil.
 
-Aceasta explică, de altfel, și de ce robustețea obținută nu se transferă la o familie de transformări nevăzută, rezultat prezentat în subsecțiunea~\ref{subsec:o6-generalizare}. Un model care s-a mutat de pe o caracteristică pe alta rămâne dependent de o singură valoare, iar concentrarea este chiar mai accentuată decât înainte: la Transformer, o singură caracteristică poartă peste patru cincimi din capacitatea de detecție. Un atacator care ar putea influența, fie și indirect, TTL-ul pachetelor de răspuns ar readuce problema în forma inițială.
+Un model care s-a mutat de pe o caracteristică pe alta rămâne dependent de o singură valoare, iar concentrarea este chiar mai accentuată decât înainte: la Transformer, o singură caracteristică poartă peste patru cincimi din capacitatea de detecție. Un atacator care ar putea influența, fie și indirect, TTL-ul pachetelor de răspuns ar readuce problema în forma inițială.
+
+Merită observat că gradul de concentrare se ordonează la fel ca rezultatul testului de generalizare din subsecțiunea~\ref{subsec:o6-generalizare}: singurul model care transferă invarianța la familia exclusă este și cel mai puțin concentrat, cu $36{,}4\%$, în timp ce modelele cu $50{,}2\%$ și $81{,}6\%$ nu o transferă. Trei modele nu sunt însă suficiente pentru a stabili o legătură, iar observația este consemnată ca atare, nu ca explicație.
 
 \subsection{Costul per clasă}\label{subsec:o6-perclasa}
 
