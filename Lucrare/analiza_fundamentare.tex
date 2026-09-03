@@ -605,7 +605,4 @@ Cadrul teoretic construit se sprijină pe un număr de ipoteze care nu pot fi ve
 \textbf{Adaptarea atacatorului nu este evaluată.}
 După reantrenare, modelul este testat folosind aceleași tipuri de transformări considerate anterior. Evaluarea nu analizează situația în care atacatorul observă efectul apărării și își modifică strategia. Prin urmare, reducerea ratei de evaziune arată că modelul a devenit mai rezistent la transformările evaluate, dar nu demonstrează robustețea sa față de alte strategii de atac.
 
-\textbf{Generalizarea la transformări noi nu este evaluată separat.}
-Utilizarea acelorași tipuri de transformări atât la antrenare, cât și la testare nu permite stabilirea măsurii în care modelul poate rezista unor perturbări diferite. O asemenea verificare ar necesita excluderea unui tip de transformare din setul de antrenare și utilizarea sa numai în etapa de evaluare. În absența acestui experiment, concluziile privind eficiența antrenării se limitează la familiile de transformări incluse în studiu.
-
 Ultima observație privind neadaptivitatea este cea mai importantă pentru interpretarea corectă a rezultatelor. O rată de evaziune ridicată măsurată în acest cadru constituie o dovadă solidă de vulnerabilitate, întrucât a fost obținută în condițiile cele mai defavorabile atacatorului. O rată scăzută, în schimb, nu constituie o dovadă de robustețe, ci doar absența unei vulnerabilități la clasa specifică de transformări evaluate.
