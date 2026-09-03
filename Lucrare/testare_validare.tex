@@ -799,6 +799,58 @@ Comparația care contează este cu proporția clasificărilor corecte pe traficu
 
 Confirmarea independentă vine de la clasa traficului legitim, unde o strategie de tip alarmă permanentă ar produce o prăbușire imediată: scorul $F1$ pe această clasă scade de la 0,7665 la 0,7522 pentru Random Forest, de la 0,8467 la 0,8308 pentru XGBoost și de la 0,7380 la 0,7348 pentru rețea.
 
+\subsection{Pe ce se sprijină modelele apărate}\label{subsec:o6-mecanism}
+
+Rezultatele de până acum arată \emph{că} apărarea funcționează, dar nu și \emph{prin ce}. Un model poate deveni invariant fie pentru că a încetat să se sprijine pe caracteristica pe care atacatorul o modifică, fie pentru că a învățat să recunoască valorile perturbate ale acesteia, păstrându-și dependența. Distincția se decide aplicând modelelor reantrenate exact procedura din secțiunea~\ref{sec:rezultate-o4}: aceeași permutare, același eșantion stratificat, aceleași cinci repetări.
+
+Comparația se face cu grupul de control, nu cu cel de referință. Altfel, o eventuală deplasare a importanței ar putea proveni din simpla adăugare de exemple, nu din perturbarea lor, ceea ce este exact confuzia pe care grupul de control a fost construit să o elimine. Tabelul~\ref{tab:o6-rho} prezintă fracțiunea accesibilă pentru cele trei grupuri.
+
+\begin{table}[!ht]
+    \caption{Fracțiunea accesibilă $\rho$ pe cele trei grupuri de antrenare. Coloana care contează este diferența dintre grupul apărat și cel de control.}
+    \centering
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{Model} & \textbf{O1} & \textbf{C1} & \textbf{O6} & \textbf{O6 $-$ C1} \\
+        \hline
+        Random Forest & 53,6\% & 38,3\% & \textbf{8,7\%} & $-29{,}6$ pp \\
+        \hline
+        XGBoost & 84,1\% & 75,7\% & \textbf{18,9\%} & $-56{,}9$ pp \\
+        \hline
+        Transformer & 26,0\% & 31,9\% & \textbf{7,2\%} & $-24{,}7$ pp \\
+        \hline
+    \end{tabular}
+    \label{tab:o6-rho}
+\end{table}
+
+Răspunsul este lipsit de ambiguitate: modelele apărate au încetat să se sprijine pe caracteristicile aflate la îndemâna atacatorului. Fracțiunea accesibilă scade la toate trei, cu între 25 și 57 de puncte procentuale față de grupul de control.
+
+Grupul de control arată de ce comparația cu el era necesară. Volumul suplimentar de date singur deplasează fracțiunea accesibilă modest și inconsecvent: o scade cu 15,3 puncte la Random Forest și cu 8,3 la XGBoost, dar o \emph{crește} cu 5,9 puncte la Transformer. Nu există, prin urmare, o tendință pe care adăugarea de exemple să o producă de la sine, iar reducerea observată la grupul apărat nu poate fi atribuită volumului.
+
+Cea mai directă lectură a rezultatului se obține urmărind o singură caracteristică. Tabelul~\ref{tab:o6-sttl} arată ce loc ocupă TTL-ul sursă, singura valoare TTL pe care atacatorul o poate seta, în clasamentul celor 42 de caracteristici.
+
+\begin{table}[!ht]
+    \caption{Poziția TTL-ului sursă în clasamentul importanței, din 42 de caracteristici. Valorile negative înseamnă că amestecarea caracteristicii nu mai degradează detecția.}
+    \centering
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        \textbf{Model} & \textbf{O1} & \textbf{C1} & \textbf{O6} \\
+        \hline
+        Random Forest & locul 1 \;(0,99) & locul 2 \;(0,81) & \textbf{locul 39} \;($-0{,}09$) \\
+        \hline
+        XGBoost & locul 1 \;(11,00) & locul 1 \;(10,84) & \textbf{locul 41} \;($-0{,}71$) \\
+        \hline
+        Transformer & locul 2 \;(1,29) & locul 2 \;(1,34) & \textbf{locul 38} \;($-0{,}02$) \\
+        \hline
+    \end{tabular}
+    \label{tab:o6-sttl}
+\end{table}
+
+Contrastul dintre coloane este rezultatul central al acestei subsecțiuni. În grupul de control, TTL-ul sursă rămâne pe primele două poziții la toate modelele, cu valori practic neschimbate față de referință. În grupul apărat, el cade pe locurile 38--41, cu scăderi negative, ceea ce înseamnă că amestecarea lui nu mai strică nimic. Modelele nu au învățat valorile perturbate ale caracteristicii, ci au încetat să o folosească.
+
+Constatarea trebuie însă calificată, pentru că modul în care s-a produs invarianța nu este cel pe care l-am dori. Caracteristica pe care toate cele trei modele apărate ajung să se sprijine preponderent este TTL-ul de răspuns, cu ponderi de 36,4\,\%, 50,2\,\% și 81,6\,\% din importanța totală. Este tot o valoare TTL, deci tot artefactul de captură descris în subsecțiunea~\ref{subsec:artefact}, doar că unul generat de victimă, pe care atacatorul nu îl atinge în modelul de amenințare adoptat. Apărarea nu a împins modelele către proprietăți de fond ale atacurilor, ci de pe un artefact accesibil pe unul inaccesibil.
+
+Aceasta explică, de altfel, și de ce robustețea obținută nu se transferă la o familie de transformări nevăzută, rezultat prezentat în subsecțiunea~\ref{subsec:o6-generalizare}. Un model care s-a mutat de pe o caracteristică pe alta rămâne dependent de o singură valoare, iar concentrarea este chiar mai accentuată decât înainte: la Transformer, o singură caracteristică poartă peste patru cincimi din capacitatea de detecție. Un atacator care ar putea influența, fie și indirect, TTL-ul pachetelor de răspuns ar readuce problema în forma inițială.
+
 \subsection{Costul per clasă}\label{subsec:o6-perclasa}
 
 Metricile globale ascund însă o degradare importantă, pe care criteriul de siguranță formulat în subsecțiunea~\ref{subsec:preinregistrare} a fost construit tocmai pentru a o detecta. Tabelul~\ref{tab:o6-worms} prezintă evoluția clasei \textit{Worms}, cea mai rară din set, cu 130 de exemple la antrenare și 44 la testare.

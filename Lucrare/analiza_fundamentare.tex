@@ -555,20 +555,22 @@ Din elementele teoretice anterioare rezultă o descompunere funcțională în ș
         \node[blocmare, right=of m1] (m2) {\textbf{M2}\\ Generarea variantelor};
         \node[blocmare, below=13mm of m2] (m3) {\textbf{M3}\\ Măsurarea evaziunii};
         \node[blocmare, left=of m3] (m4) {\textbf{M4}\\ Analiza sensibilității};
-        \node[bloc, left=of m4, minimum width=20mm] (m5) {\textbf{M5}\\ Interfața};
-        \node[blocmare, below=13mm of m4] (m6) {\textbf{M6}\\ Antrenarea adversarială};
+        \node[bloc, left=of m4, minimum width=20mm] (m6) {\textbf{M6}\\ Interfața};
+        \node[blocmare, below=13mm of m4] (m5) {\textbf{M5}\\ Antrenarea adversarială};
 
         \draw[sageata] (date) -- (m1);
         \draw[sageata] (m1) -- node[eticheta, above] {fluxurile de} node[eticheta, below] {măsurare} (m2);
         \draw[sageata] (m2) -- node[eticheta, right] {28 de variante} (m3);
         \draw[sageata] (m3) -- node[eticheta, midway, align=center, fill=white, inner sep=1pt] {rezultate\\ per flux} (m4);
-        \draw[sageata] (m4) -- (m5);
-        \draw[sageata] (m4) -- node[eticheta, right] {caracteristicile} node[eticheta, right, yshift=-3.2mm] {vulnerabile} (m6);
-        \draw[sageata] (m6.east) -| node[eticheta, pos=0.28, above] {trei grupuri} (m3.south);
+        \draw[sageata] (m4) -- (m6);
+        \draw[sageata] (m5.west) -| node[eticheta, pos=0.32, above] {rezultatele} node[eticheta, pos=0.32, below] {antrenării} (m6.south);
+        \draw[sageata] (m2.east) -- ++(10mm,0) |- node[eticheta, pos=0.82, above] {generatoarele} (m5.south);
+        \draw[sageata] (m5.east) -| node[eticheta, pos=0.28, above] {trei grupuri} (m3.south);
+        \draw[sageata] (m5.north) -- node[eticheta, right] {modele apărate} (m4.south);
 
         \draw[punctat] (m1.south) -- node[eticheta, pos=0.62, left] {modele înghețate} (m4.north);
     \end{tikzpicture}
-    \caption{Structura funcțională a soluției și fluxul de date între module. Săgeata punctată indică modelele înghețate, folosite fără reantrenare de toate etapele ulterioare.}
+    \caption{Structura funcțională a soluției și fluxul de date între module. Săgeata punctată indică modelele înghețate din M1, folosite fără reantrenare de M4. M4 se aplică de două ori, o dată modelelor de referință și o dată celor apărate produse de M5. Interfața, M6, este singurul modul terminal, consumând atât rezultatele analizei de sensibilitate, cât și pe cele ale antrenării adversariale.}
     \label{fig:pipeline}
 \end{figure}
 
@@ -576,13 +578,13 @@ Din elementele teoretice anterioare rezultă o descompunere funcțională în ș
 
 \textbf{Modulul M2} generează variantele perturbate. El pune în aplicare cele patru condiții din subsecțiunea~\ref{subsec:admisibile} și procedura de propagare din subsecțiunea~\ref{subsec:propagare}. Fiecare variantă generată este supusă unui set de verificări de validitate înainte de a fi transmisă mai departe. O variantă care încalcă o constrângere este respinsă, nu corectată tacit. Modulul depinde de M1 doar prin mulțimea fluxurilor de măsurat, nu prin structura modelelor.
 
-\textbf{Modulul M3} aplică modelele înghețate variantelor perturbate și încadrează rezultatele conform taxonomiei din subsecțiunea~\ref{subsec:rezultate}, calculând ratele și intervalele. Verificarea invariantului identității precede orice altă măsurătoare.
+\textbf{Modulul M3} aplică modelele înghețate variantelor perturbate și încadrează rezultatele conform taxonomiei din subsecțiunea~\ref{subsec:rezultate}, calculând ratele și intervalele. Verificarea invariantului identității precede orice altă măsurătoare. Mecanismul este invocat de două ori în cursul experimentului, o dată pentru modelele din M1 și o dată pentru cele din M5, iar cele două rulări scriu rezultate în locații separate, pentru ca ratele modelelor de referință să nu se amestece cu cele ale modelelor apărate.
 
-\textbf{Modulul M4} calculează importanțele și fracțiunile accesibile și pune în coresponden\-ță importanța caracteristicilor afectate de fiecare transformare cu rata de evaziune produsă de acea transformare. El consumă atât modelele din M1, cât și rezultatele per flux din M3.
+\textbf{Modulul M4} calculează importanțele și fracțiunile accesibile și pune în coresponden\-ță importanța caracteristicilor afectate de fiecare transformare cu rata de evaziune produsă de acea transformare. El consumă atât modelele din M1, cât și rezultatele per flux din M3. Aceeași procedură se aplică, într-o a doua rulare, modelelor produse de M5, pentru a stabili dacă apărarea a schimbat caracteristicile pe care acestea se sprijină. Rezultatul acestei a doua rulări este prezentat în subsecțiunea~\ref{subsec:o6-mecanism}.
 
-\textbf{Modulul M5} expune rezultatele într-o formă explorabilă interactiv și permite evaluarea unor combinații de parametri care nu fac parte din setul predefinit. Cerința teoretică impusă acestui modul este ca perturbările pe care le aplică să fie construite prin aceleași mecanisme ca cele din M2, iar nu printr-o realizare paralelă. Altfel, valorile afișate interactiv ar putea diverge de cele măsurate sistematic, iar modulul ar înceta să fie un instrument de explorare a acelorași rezultate.
+\textbf{Modulul M5} reia antrenarea clasificatoarelor pe seturi augmentate cu variante perturbate, conform construcției din secțiunea~\ref{sec:antrenare}. Spre deosebire de celelalte module, el nu consumă modelele înghețate, ci produce modele noi, motiv pentru care artefactele sale sunt păstrate separat și nu înlocuiesc niciodată modelele de referință. Dependența lui de M2 este una de mecanism, nu de rezultat: folosește aceleași generatoare, dar aplicate partiției de antrenare și cu statisticile restrânse conform subsecțiunii~\ref{subsec:provenienta}. Legătura cu M3 este, la rândul ei, tot una de mecanism, conform explicației de mai sus. Bucla astfel închisă nu introduce circularitate, întrucât măsurarea se face cu modelele deja antrenate și înghețate la rândul lor.
 
-\textbf{Modulul M6} reia antrenarea clasificatoarelor pe seturi augmentate cu variante perturbate, conform construcției din secțiunea~\ref{sec:antrenare}. Spre deosebire de celelalte module, el nu consumă modelele înghețate, ci produce modele noi, motiv pentru care artefactele sale sunt păstrate separat și nu înlocuiesc niciodată modelele de referință. Dependența lui de M2 este una de mecanism, nu de rezultat: folosește aceleași generatoare, dar aplicate partiției de antrenare și cu statisticile restrânse conform subsecțiunii~\ref{subsec:provenienta}. Modelele rezultate sunt readuse în M3 pentru măsurare, ceea ce închide singura buclă din structură. Bucla nu introduce însă circularitate, întrucât măsurarea se face cu modelele deja antrenate și înghețate la rândul lor.
+\textbf{Modulul M6} expune rezultatele într-o formă explorabilă interactiv și permite evaluarea unor combinații de parametri care nu fac parte din setul predefinit. Cerința teoretică impusă acestui modul este ca perturbările pe care le aplică să fie construite prin aceleași mecanisme ca cele din M2, iar nu printr-o realizare paralelă. Altfel, valorile afișate interactiv ar putea diverge de cele măsurate sistematic, iar modulul ar înceta să fie un instrument de explorare a acelorași rezultate. Fiind ultimul din lanț, este și singurul care afișează simultan rezultatele lui M4 și pe cele ale lui M5, motiv pentru care depinde de amândouă, nu doar de modulul care îl precede direct.
 
 Dependențele dintre module sunt unidirecționale, iar fiecare tranziție este însoțită de o condiție verificabilă: varianta neperturbată generată de M2 trebuie să reproducă predicțiile de referință ale lui M1, iar rata de evaziune calculată de M3 pentru această variantă trebuie să fie nulă. Aceste condiții transformă lanțul de prelucrare într-o succesiune de etape verificabile independent, ceea ce permite localizarea unei eventuale erori la nivelul modulului care o produce.
 

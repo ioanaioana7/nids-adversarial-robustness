@@ -1,0 +1,4 @@
+model,total_detection_drop,perturbable_share_pct,top_feature,top_feature_drop,top_feature_share_pct
+RandomForest,3.0637,8.7,dttl,1.1165,36.44
+Transformer,12.0417,7.16,dttl,9.8232,81.58
+XGBoost,20.6539,18.89,dttl,10.3754,50.23
