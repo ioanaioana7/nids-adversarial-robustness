@@ -565,12 +565,12 @@ Din elementele teoretice anterioare rezultă o descompunere funcțională în ș
         \draw[sageata] (m4) -- (m6);
         \draw[sageata] (m5.west) -| node[eticheta, pos=0.32, above] {rezultatele} node[eticheta, pos=0.32, below] {antrenării} (m6.south);
         \draw[sageata] (m2.east) -- ++(10mm,0) |- node[eticheta, pos=0.82, above] {generatoarele} (m5.south);
-        \draw[sageata] (m5.east) -| node[eticheta, pos=0.28, above] {trei grupuri} (m3.south);
-        \draw[sageata] (m5.north) -- node[eticheta, right] {modele apărate} (m4.south);
+        \draw[sageata] (m5.east) -| node[eticheta, pos=0.28, above] {modele reantrenate} (m3.south);
+        \draw[sageata] (m5.north) -- node[eticheta, right] {modele reantrenate} (m4.south);
 
-        \draw[punctat] (m1.south) -- node[eticheta, pos=0.62, left] {modele înghețate} (m4.north);
+        \draw[punctat] (m1.south) -- node[eticheta, pos=0.62, left] {modele de referință} (m4.north);
     \end{tikzpicture}
-    \caption{Structura funcțională a soluției și fluxul de date între module. Săgeata punctată indică modelele înghețate din M1, folosite fără reantrenare de M4. M4 se aplică de două ori, o dată modelelor de referință și o dată celor apărate produse de M5. Interfața, M6, este singurul modul terminal, consumând atât rezultatele analizei de sensibilitate, cât și pe cele ale antrenării adversariale.}
+    \caption{Structura funcțională a soluției și fluxul de date între module. Săgeata punctată indică modelele de referință din M1, folosite de M4 fără reantrenare. M4 se aplică de două ori, o dată acestora și o dată modelelor reantrenate produse de M5. Interfața, M6, este singurul modul terminal, consumând atât rezultatele analizei de sensibilitate, cât și pe cele ale antrenării adversariale.}
     \label{fig:pipeline}
 \end{figure}
 

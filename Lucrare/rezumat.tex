@@ -1,5 +1,5 @@
 %%% Foaie de sumar — document de sine statator, doua pagini.
-%%% Se compileaza separat: pdflatex rezumat.tex
+%%% Se compileaza separat: pdflatex rezumat.tex (de doua ori, pentru citari)
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[T1]{fontenc}
@@ -13,12 +13,42 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,fit,calc,shapes.geometric,backgrounds}
 
+% Citarile devin legaturi: un clic pe [4] duce la intrarea din bibliografie.
+% Se incarca ultimul, cum cere hyperref.
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+	colorlinks=true,
+	citecolor=[rgb]{0.10,0.25,0.55},   % bleumarin, lizibil si la tipar alb-negru
+	linkcolor=[rgb]{0.10,0.25,0.55},
+	pdftitle={Sinteza proiectului de diplomă},
+	pdfauthor={Ioana-Alina Neacșu},
+	pdflang={ro}
+}
+
 \geometry{a4paper, total={170mm,252mm}, left=20mm, top=20mm}
 \setlist{noitemsep,topsep=2pt,leftmargin=5mm}
 \titlespacing*{\section}{0pt}{7pt}{3pt}
 \titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{0.5em}{}
 \pagestyle{empty}
 \raggedbottom
+
+% Ca in lucrare: permite intinderea spatiilor ca ultima solutie, pentru cuvintele
+% lungi din romana care altfel depasesc marginea.
+\emergencystretch=1.5em
+
+% Bibliografia are deja titlu de sectiune ("Surse de documentare"), deci se scoate
+% titlul automat pe care l-ar adauga mediul thebibliography.
+\makeatletter
+\renewenvironment{thebibliography}[1]
+  {\list{\@biblabel{\@arabic\c@enumiv}}%
+     {\settowidth\labelwidth{\@biblabel{#1}}%
+      \leftmargin\labelwidth \advance\leftmargin\labelsep
+      \usecounter{enumiv}\let\p@enumiv\@empty
+      \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+   \sloppy\clubpenalty4000\@clubpenalty\clubpenalty
+   \widowpenalty4000\sfcode`\.\@m}
+  {\def\@noitemerr{\@latex@warning{Bibliografie goala}}\endlist}
+\makeatother
 
 % aceleasi stiluri de diagrama ca in lucrare
 \tikzset{
@@ -33,45 +63,54 @@
 \begin{document}
 
 \begin{center}
-	{\large\bfseries Evaluarea robusteții sistemelor de detecție a intruziunilor\\
-	bazate pe învățare automată în fața perturbărilor adversariale}\\[2pt]
-	{\small Absolvent: Ioana-Alina Neacșu \quad$\vert$\quad
-	 Coordonator științific: Șl.Dr.Ing. Eugen Richard Ardelean}
+	\includegraphics[width=\textwidth]{figs/AntetUTCNRom.pdf}\\[2pt]
+	{\sffamily\bfseries\small FACULTATEA DE AUTOMATICĂ ȘI CALCULATOARE\\
+	DEPARTAMENTUL CALCULATOARE}\\[6pt]
+	{\large\bfseries SINTEZA}\\
+	proiectului de diplomă cu titlul:\\[3pt]
+	{\bfseries EVALUAREA ROBUSTEȚII SISTEMELOR DE DETECȚIE A INTRUZIUNILOR\\
+	BAZATE PE ÎNVĂȚARE AUTOMATĂ ÎN FAȚA PERTURBĂRILOR ADVERSARIALE}
 \end{center}
+\vspace{2mm}
+
+\noindent
+\begin{tabular}{@{}ll}
+	Autor: & \textbf{Ioana-Alina NEACȘU} \\
+	Coordonator: & \textbf{Șl.Dr.Ing. Eugen Richard ARDELEAN} \\
+\end{tabular}
 \vspace{2mm}
 
 \section{Cerințele temei}
 
-Evaluarea empirică a robusteții unor clasificatoare de trafic de rețea în fața unor
-variante modificate deliberat ale traficului malițios. Tema impune: antrenarea unor
-clasificatoare multi-clasă pe setul public UNSW-NB15, în partiția oficială (175\,341 de
-înregistrări de antrenare, 82\,332 de testare, 42 de caracteristici predictive, 10 clase);
-generarea de variante perturbate prin transformări care păstrează funcționalitatea atacului
-(modificarea câmpului TTL, umplutură, dilatare temporală, reducerea ratei de conexiuni);
-măsurarea ratei de evaziune pe tipuri și niveluri de intensitate; analiza sensibilității
-modelelor la caracteristicile afectate; reantrenarea pe seturi augmentate cu variante
-perturbate, cu măsurarea câștigului și a costului; și o interfață de vizualizare și testare.
+Evaluarea empirică a robusteții unor clasificatoare de trafic de rețea în fața unor variante
+modificate deliberat ale traficului malițios. Tema impune: antrenarea unor clasificatoare
+multi-clasă pe UNSW-NB15~\cite{moustafa2015unsw}, în partiția oficială (175\,341 de
+înregistrări de antrenare, 82\,332 de testare, 42 de caracteristici predictive, 10 clase),
+generarea de variante perturbate prin transformări asupra traficului, precum modificarea
+valorii TTL~\cite{gont2011rfc6274}, umplutura, dilatarea temporală și reducerea ratei de
+conexiuni, măsurarea evaziunii pe tipuri și niveluri, analiza sensibilității, reantrenarea pe
+seturi augmentate, cu măsurarea câștigului și a costului, plus o interfață de vizualizare și
+testare.
 
 \section{Soluții alese}
 
-\textbf{Modele.} Două ansambluri de arbori, Random Forest și XGBoost, plus o arhitectură
-Transformer adaptată datelor tabulare, implementată de la zero, pentru a contrasta două
+\textbf{Modele.} Două ansambluri de arbori, Random Forest~\cite{breiman2001random} și
+XGBoost~\cite{chen2016xgboost}, plus o arhitectură Transformer adaptată datelor
+tabulare~\cite{gorishniy2021revisiting}, implementată de la zero, pentru a contrasta două
 moduri fundamental diferite de a construi decizia.
 
-\textbf{Mulțimea perturbărilor admisibile.} Vecinătatea metrică uzuală din literatura
-exemplelor adversariale a fost înlocuită cu o mulțime structurată, definită prin patru
+\textbf{Mulțimea perturbărilor admisibile.} Perturbările sunt delimitate prin patru
 condiții: direcționalitate, limite relative la observația originală, imuabilitatea
-caracteristicilor aflate în afara controlului atacatorului și închiderea la dependențele
-dintre caracteristici. Ultima a necesitat un mecanism propriu de propagare, care recalculează
-exact caracteristicile derivate fără a cunoaște constantele senzorului. Caracteristica
-imposibil de reconstituit dintr-un flux izolat este raportată ca interval delimitat de două
-politici declarate, nu ca valoare unică obținută printr-o presupunere tacită.
+caracteristicilor din afara controlului atacatorului și închiderea la dependențele dintre
+caracteristici. Ultima a necesitat un mecanism propriu de propagare, care recalculează exact
+caracteristicile derivate fără a cunoaște constantele senzorului. Rezultatele care depind de
+caracteristica nereconstituibilă sunt raportate sub formă de interval.
 
-\textbf{Apărarea.} Antrenare adversarială prin augmentare, nu prin gradient, întrucât
-gradientul ar presupune un acces la model pe care atacatorul nu îl are și nu se aplică
-ansamblurilor de arbori. Efectul este izolat printr-un grup de control antrenat pe același
-număr de exemple neperturbate, prin ponderi de clasă înghețate și printr-o mulțime comună de
-fluxuri, cu criterii de succes fixate înaintea rulării.
+\textbf{Apărarea.} Antrenare adversarială prin augmentare~\cite{goodfellow2015explaining,
+madry2018towards}, nu prin gradient, întrucât gradientul ar presupune un acces la model pe
+care atacatorul nu îl are și nu se aplică arborilor. Efectul este izolat printr-un grup de
+control antrenat pe același număr de exemple neperturbate, prin ponderi de clasă înghețate și
+printr-o mulțime comună de fluxuri, cu criterii fixate înaintea rulării.
 
 \vspace{-1mm}
 \begin{figure}[h]
@@ -92,81 +131,92 @@ fluxuri, cu criterii de succes fixate înaintea rulării.
 		\draw[sageata] (m4) -- (m6);
 		\draw[sageata] (m5.west) -| node[eticheta, pos=0.3, above] {rezultate} (m6.south);
 		\draw[sageata] (m2.east) -- ++(7mm,0) |- node[eticheta, pos=0.42, right] {generatoarele} (m5.south);
-		\draw[sageata] (m5.east) -| node[eticheta, pos=0.28, above] {trei grupuri} (m3.south);
-		\draw[sageata] (m5.north) -- node[eticheta, right] {modele apărate} (m4.south);
-		\draw[punctat] (m1.south) -- node[eticheta, pos=0.6, left] {modele înghețate} (m4.north);
+		\draw[sageata] (m5.east) -| node[eticheta, pos=0.28, above] {modele reantrenate} (m3.south);
+		\draw[sageata] (m5.north) -- node[eticheta, right] {modele reantrenate} (m4.south);
+		\draw[punctat] (m1.south) -- node[eticheta, pos=0.6, left] {modele de referință} (m4.north);
 	\end{tikzpicture}\\[1mm]
-	{\footnotesize Structura funcțională a soluției. M4 se aplică de două ori, modelelor de
-	referință și celor apărate. M6 este singurul modul terminal.}
+	{\footnotesize Figura 1. Structura funcțională a soluției.}
 \end{figure}
 
 \section{Rezultate obținute}
 
-\textbf{Vulnerabilitatea.} O singură modificare a valorii TTL, realizabilă prin configurarea
-socketului, duce modelul cu cel mai bun macro-$F1$ de la $0\%$ la peste $50\%$ evaziune;
-combinată cu umplutură și dilatare temporală, rata ajunge la aproape $97\%$. Celelalte
-transformări lasă evaziunea sub $1{,}3\%$ la orice intensitate.
+\textbf{Vulnerabilitatea.} O singură modificare a valorii TTL duce modelul cu cel mai bun
+macro-$F1$ de la $0\%$ la peste $50\%$ evaziune, iar combinată cu umplutură și dilatare
+temporală, rata ajunge la aproape $97\%$. Celelalte transformări lasă evaziunea sub $1{,}3\%$
+la orice intensitate.
 
-\textbf{Cauza.} Valoarea TTL este un artefact al mediului de captură, nu o proprietate a
-atacurilor: în partiția de antrenare, $70{,}5\%$ din traficul legitim are valoarea 31, iar
-fiecare clasă de atac are dominanta 254. Mărimea introdusă în lucrare, \emph{fracțiunea
-accesibilă} $\rho$, arată că modelele se ordonează invers față de rezistența lor:
+\textbf{Cauza.} Valoarea TTL funcționează ca un artefact al mediului de captură în UNSW-NB15,
+nu ca o proprietate a atacurilor: în partiția de antrenare, $70{,}5\%$ din traficul legitim
+are valoarea 31, iar fiecare clasă de atac are dominanta 254. Mărimea introdusă în lucrare,
+fracțiunea accesibilă $\rho$, arată că modelele se ordonează invers față de rezistența lor:
 $84{,}1\%$ la XGBoost, $53{,}6\%$ la Random Forest, $26{,}0\%$ la Transformer. Rezistența
-Transformer nu provine dintr-o reprezentare mai bună, ci din dependența de o caracteristică
-generată de victimă.
+aparent superioară a Transformerului este explicată în mare măsură de dependența de o
+caracteristică generată de victimă.
 
 \textbf{Apărarea.} Reantrenarea reduce evaziunea în cel mai rău caz sub $0{,}5\%$ la toate
 trei modelele, de la valori între $71\%$ și $97\%$, iar câștigul se menține față de grupul de
 control. Costul este sub $0{,}023$ de macro-$F1$, dar concentrat: clasa cea mai rară pierde
-între $0{,}075$ și $0{,}127$. Analiza sensibilității aplicată modelelor apărate arată
-\emph{prin ce} s-a obținut rezultatul: TTL-ul sursă cade de pe locul 1 pe locurile 38--41 din
-42, iar $\rho$ scade la $7$--$19\%$. Modelele nu au memorat perturbările, au abandonat
-caracteristica. Invarianța se transferă însă la o familie nevăzută doar la unul dintre cele
-trei modele, iar dependența se mută pe TTL-ul de răspuns, tot un artefact de captură.
+între $0{,}075$ și $0{,}127$. Analiza sensibilității aplicată modelelor apărate arată prin ce
+s-a obținut rezultatul: TTL-ul sursă coboară de pe primele două poziții pe locurile 38--41 din
+42, iar $\rho$ scade la $7$--$19\%$.
 
 \section{Testări și verificări}
 
-Validarea este organizată pe patru niveluri: determinism, validitate a variantelor, testare
-negativă a suitei de validare și invarianți de capăt la capăt. Verificările executate:
+Verificarea a urmărit patru aspecte: determinismul rulărilor, validitatea variantelor
+perturbate, capacitatea de respingere a variantelor invalide și corectitudinea întregului
+lanț. Rezultatele:
 
 \begin{itemize}
-	\item varianta neperturbată reproduce predicțiile de referință rând cu rând, pe întreaga
-	partiție de testare, și produce evaziune nulă;
-	\item grupul de referință al antrenării adversariale reproduce modelele înghețate:
-	0 nepotriviri din 82\,332 la toate cele trei familii, iar rețeaua coincide și pe
-	traiectoria de optimizare, până la a patra zecimală;
-	\item lanțul de măsurare al apărării reproduce toate cifrele publicate anterior, cu o
-	abatere maximă de $0{,}0000$ puncte procentuale pe 28 de variante;
-	\item eroarea reziduală a propagării dependențelor este de ordinul $10^{-15}$;
-	\item mulțimea comună acoperă între $96{,}3\%$ și $99{,}3\%$ din fluxurile de atac, deci
-	comparațiile nu se fac pe un rest îngust;
-	\item suita respinge efectiv variante invalide construite intenționat.
+	\item execuția deterministă a fost verificată prin rulări repetate;
+	\item cele 28 de variante au trecut 1\,259 de verificări de validitate, fără nicio
+	încălcare, iar recalcularea caracteristicilor derivate a păstrat relațiile dintre ele cu o
+	eroare de ordinul $10^{-15}$;
+	\item toate variantele construite intenționat cu încălcarea constrângerilor au fost
+	respinse de verificări;
+	\item varianta care nu modifică nimic a reprodus exact predicțiile modelelor de referință;
+	\item codul de evaluare folosit în etapa adversarială a reprodus, pe modelele de
+	referință, aceleași rate ca măsurarea inițială;
+	\item seturile utilizate pentru compararea modelelor au inclus între $96{,}3\%$ și
+	$99{,}3\%$ dintre fluxurile de atac.
 \end{itemize}
 
 \section{Contribuții personale}
 
-Formularea mulțimii perturbărilor admisibile și mecanismul de propagare care o face
-realizabilă. Tratarea explicită a caracteristicii nereconstituibile prin raportare sub formă
-de interval. Introducerea fracțiunii accesibile $\rho$, care leagă cantitativ importanța
-caracteristicilor de rata de evaziune, exprimându-le în aceleași unități. Protocolul
-experimental al apărării, cu grup de control, ponderi înghețate, mulțime comună și criterii
-pre-înregistrate. Grupul antrenat cu o familie exclusă deliberat, care a arătat că robustețea
-obținută nu se generalizează. Aplicarea analizei de sensibilitate modelelor apărate, care a
-stabilit mecanismul apărării. Implementarea de la zero a arhitecturii Transformer și a
-interfeței interactive, construită din aceleași primitive validate ca experimentele
-sistematice.
+Formularea mulțimii perturbărilor admisibile și mecanismul de propagare care păstrează
+consistența internă a variantelor generate. Raportarea sub formă de interval a caracteristicii
+nereconstituibile. Introducerea fracțiunii accesibile $\rho$, care leagă cantitativ importanța
+caracteristicilor de rata de evaziune. Protocolul experimental al apărării, cu grup de
+control, ponderi înghețate, mulțime comună și criterii stabilite și consemnate înaintea
+rulării. Grupul antrenat cu o familie exclusă deliberat, care a arătat că robustețea nu se
+generalizează. Aplicarea analizei de sensibilitate modelelor apărate, care a stabilit
+mecanismul apărării.
 
 \section{Surse de documentare}
 
-Lucrarea se sprijină pe 25 de referințe, grupate pe patru direcții. \textbf{Seturi de date:}
-analiza comparativă a lui Ring et al., lucrarea de introducere a setului UNSW-NB15 a lui
-Moustafa și Slay, CIC-IDS-2017, analiza critică a setului KDD CUP 99 și studiul lui Liu et
-al. asupra erorilor din seturile CIC. \textbf{Modele de clasificare:} Breiman, Chen și
-Guestrin, plus studii aplicate de detecție a intruziunilor. \textbf{Arhitecturi neuronale:}
-lucrarea de referință a mecanismului de atenție, adaptarea la date tabulare a lui Gorishniy
-et al., pe care se bazează implementarea, și lucrări de detecție bazate pe transformere.
-\textbf{Învățare adversarială:} Szegedy et al. și Goodfellow et al. pentru originea
-exemplelor adversariale, Madry et al. pentru formularea min-max a antrenării adversariale,
-studii de evaziune specifice traficului de rețea și RFC~6274 pentru semantica câmpului TTL.
+\vspace{-2mm}
+\begin{thebibliography}{9}
+	\setlength{\itemsep}{0pt}
+	\bibitem{moustafa2015unsw} N.~Moustafa, J.~Slay, „UNSW-NB15: A Comprehensive Data Set for
+	Network Intrusion Detection Systems”, MilCIS, 2015.
+	\bibitem{breiman2001random} L.~Breiman, „Random Forests”, \textit{Machine Learning},
+	vol.~45, nr.~1, 2001.
+	\bibitem{chen2016xgboost} T.~Chen, C.~Guestrin, „XGBoost: A Scalable Tree Boosting
+	System”, ACM SIGKDD, 2016.
+	\bibitem{gorishniy2021revisiting} Y.~Gorishniy et al., „Revisiting Deep Learning Models
+	for Tabular Data”, NeurIPS, vol.~34, 2021.
+	\bibitem{goodfellow2015explaining} I.~J.~Goodfellow, J.~Shlens, C.~Szegedy, „Explaining
+	and Harnessing Adversarial Examples”, ICLR, 2015.
+	\bibitem{madry2018towards} A.~Madry et al., „Towards Deep Learning Models Resistant to
+	Adversarial Attacks”, ICLR, 2018.
+	\bibitem{gont2011rfc6274} F.~Gont, „Security Assessment of the Internet Protocol Version
+	4”, IETF RFC~6274, 2011.
+\end{thebibliography}
+
+\vspace{4mm}
+\noindent
+\begin{tabular}{@{}p{5cm}p{3cm}p{6cm}}
+	Data: \rule{3cm}{0.4pt} & Autor & \rule{5.5cm}{0.4pt} \\[6mm]
+	& Coordonator & \rule{5.5cm}{0.4pt} \\
+\end{tabular}
 
 \end{document}
