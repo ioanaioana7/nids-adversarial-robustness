@@ -85,7 +85,7 @@ def main():
     evaluation.export_probabilities("XGBoost", test[config.ID_COL].values, xgb_proba, le.classes_)
 
     # ---- Metadata de experiment, pentru reproducibilitate si pentru O2 ----
-    experiment.save_label_mapping(le)
+    experiment.save_label_mapping(le)0
     experiment.save_feature_names(rf_pipeline.named_steps["prep"])
     experiment.save_dataset_summary(train, test, numeric_cols)
     experiment.save_experiment_metadata(

@@ -136,6 +136,7 @@ src/adversarial/
     transformer_arm.py             # augmentare dinamica per epoca pentru retea
     evaluation.py                  # cohorta comuna + matricile de rezultate per rand
     report.py                      # tabele, figuri, verdictul fata de criteriile fixate
+    sensitivity_arms.py            # importanta prin permutare pe bratele o6 si c1
     runner.py                      # orchestrare + manifest
 models/adversarial/                # modelele bratelor (nu se versioneaza, ~5GB)
 results/adversarial/               # manifest, metrici, cohorte, verdict
@@ -206,7 +207,7 @@ radacina proiectului.
 
 Pasul 2 e optional daca vrei doar arborii; pasii 4-6 il vor sari automat.
 Pasii 3-6 **nu reantreneaza nimic** — incarca modelele inghetate. Pasul 7 antreneaza
-20 de modele noi, dar in `models/adversarial/`: nu atinge niciun artefact O1-O5.
+30 de modele noi, dar in `models/adversarial/`: nu atinge niciun artefact O1-O5.
 
 ### Detalii utile
 
@@ -521,3 +522,12 @@ acelasi jurnal al rularii.
       permutare comparabila intre modele, corelata cu evaziunea (Spearman rho 0,83-0,95)
 - [x] Interfata de vizualizare si testare interactiva (O5) — `python -m streamlit run ui/app.py`;
       perturbari live cu valori arbitrare, validate cu aceleasi verificari ca in O2
+- [x] Antrenare adversariala (O6) — `python train_adversarial.py`; 30 de modele in patru
+      grupuri (referinta, control, aparat, aparat fara familia TTL), ponderi de clasa
+      inghetate, multime comuna de fluxuri si criterii fixate inaintea rularii.
+      Evaziunea in cel mai rau caz scade sub 0,5% la toate trei modelele, dar
+      generalizarea la o familie nevazuta se produce doar la unul din trei
+- [x] Importanta prin permutare pe modelele aparate (`src/adversarial/sensitivity_arms.py`)
+      — arata *prin ce* s-a obtinut robustetea: fractiunea accesibila scade de la
+      38-76% (control) la 7-19% (aparat), iar `sttl` cade de pe primele pozitii pe
+      locurile 38-41 din 42

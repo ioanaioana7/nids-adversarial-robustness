@@ -28,6 +28,7 @@ __pycache__/
 
 # Random files
 docs/
+Lucrare/
 
 # LaTeX: produse de compilare ale lucrarii (sursele .tex/.bib/.sty raman versionate).
 # licenta.pdf e regenerabil din surse; scoate-l de aici daca vrei PDF-ul in repo.

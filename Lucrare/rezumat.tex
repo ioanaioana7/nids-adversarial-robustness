@@ -32,6 +32,12 @@
 \pagestyle{empty}
 \raggedbottom
 
+% Paragrafele au eticheta proprie in bold (Modele., Apararea., ...), deci se citesc
+% mai bine aliniate toate la stanga. Implicit, article indenteaza tot ce urmeaza
+% dupa primul paragraf al unei sectiuni, ceea ce le aliniaza inconsecvent.
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.5pt}
+
 % Ca in lucrare: permite intinderea spatiilor ca ultima solutie, pentru cuvintele
 % lungi din romana care altfel depasesc marginea.
 \emergencystretch=1.5em
@@ -63,7 +69,7 @@
 \begin{document}
 
 \begin{center}
-	\includegraphics[width=\textwidth]{figs/AntetUTCNRom.pdf}\\[2pt]
+	\includegraphics[width=0.84\textwidth]{figs/AntetUTCNRom.pdf}\\[2pt]
 	{\sffamily\bfseries\small FACULTATEA DE AUTOMATICĂ ȘI CALCULATOARE\\
 	DEPARTAMENTUL CALCULATOARE}\\[6pt]
 	{\large\bfseries SINTEZA}\\
@@ -99,22 +105,27 @@ XGBoost~\cite{chen2016xgboost}, plus o arhitectură Transformer adaptată datelo
 tabulare~\cite{gorishniy2021revisiting}, implementată de la zero, pentru a contrasta două
 moduri fundamental diferite de a construi decizia.
 
-\textbf{Mulțimea perturbărilor admisibile.} Perturbările sunt delimitate prin patru
-condiții: direcționalitate, limite relative la observația originală, imuabilitatea
-caracteristicilor din afara controlului atacatorului și închiderea la dependențele dintre
-caracteristici. Ultima a necesitat un mecanism propriu de propagare, care recalculează exact
-caracteristicile derivate fără a cunoaște constantele senzorului. Rezultatele care depind de
+\textbf{Mulțimea perturbărilor admisibile.} O modificare contează doar dacă atacatorul chiar
+o poate produce. Perturbările sunt deci limitate prin patru condiții care exclud ce nu se poate face: 
+atacatorul își controlează doar propriile pachete, modificările rămân
+proporționale cu fluxul de la care pleacă, ce definește identitatea atacului rămâne nemodificat,
+iar tot ce depinde de valorile schimbate se recalculează, altfel fluxul ar deveni incoerent.
+Ultima condiție a cerut un mecanism propriu de propagare, care reface caracteristicile
+derivate fără să cunoască constantele senzorului. Rezultatele care depind de
 caracteristica nereconstituibilă sunt raportate sub formă de interval.
 
 \textbf{Apărarea.} Antrenare adversarială prin augmentare~\cite{goodfellow2015explaining,
 madry2018towards}, nu prin gradient, întrucât gradientul ar presupune un acces la model pe
-care atacatorul nu îl are și nu se aplică arborilor. Efectul este izolat printr-un grup de
-control antrenat pe același număr de exemple neperturbate, prin ponderi de clasă înghețate și
-printr-o mulțime comună de fluxuri, cu criterii fixate înaintea rulării.
+care atacatorul nu îl are și nu se aplică arborilor. Augmentarea schimbă însă mai multe lucruri
+deodată, nu doar prezența perturbării. Ca să rămână doar efectul ei, grupul de control
+primește tot atâtea copii, dar nemodificate, ponderile de clasă sunt identice la toate
+grupurile, ratele se calculează pe aceeași mulțime de fluxuri, iar pragurile de succes sunt
+fixate înainte de rulare.
 
 \vspace{-1mm}
 \begin{figure}[h]
 	\centering
+	\scalebox{0.86}{%
 	\begin{tikzpicture}[node distance=6mm and 15mm]
 		\node[bloc, minimum width=17mm] (date) {Date\\ UNSW-NB15};
 		\node[blocmare, right=of date] (m1) {\textbf{M1}\\ Antrenare și evaluare};
@@ -134,7 +145,7 @@ printr-o mulțime comună de fluxuri, cu criterii fixate înaintea rulării.
 		\draw[sageata] (m5.east) -| node[eticheta, pos=0.28, above] {modele reantrenate} (m3.south);
 		\draw[sageata] (m5.north) -- node[eticheta, right] {modele reantrenate} (m4.south);
 		\draw[punctat] (m1.south) -- node[eticheta, pos=0.6, left] {modele de referință} (m4.north);
-	\end{tikzpicture}\\[1mm]
+	\end{tikzpicture}}\\[1mm]
 	{\footnotesize Figura 1. Structura funcțională a soluției.}
 \end{figure}
 
@@ -147,18 +158,20 @@ la orice intensitate.
 
 \textbf{Cauza.} Valoarea TTL funcționează ca un artefact al mediului de captură în UNSW-NB15,
 nu ca o proprietate a atacurilor: în partiția de antrenare, $70{,}5\%$ din traficul legitim
-are valoarea 31, iar fiecare clasă de atac are dominanta 254. Mărimea introdusă în lucrare,
-fracțiunea accesibilă $\rho$, arată că modelele se ordonează invers față de rezistența lor:
-$84{,}1\%$ la XGBoost, $53{,}6\%$ la Random Forest, $26{,}0\%$ la Transformer. Rezistența
-aparent superioară a Transformerului este explicată în mare măsură de dependența de o
-caracteristică generată de victimă.
+are TTL-ul 31, în timp ce în fiecare clasă de atac domină valoarea 254. Se poate
+deci măsura cât de expus este un model : fracțiunea accesibilă $\rho$, introdusă în 
+lucrare, arată ce parte din capacitatea lui de detecție se sprijină pe caracteristici aflate 
+la îndemâna atacatorului. XGBoost are $84{,}1\%$, Random Forest $53{,}6\%$, iar Transformer $26{,}0\%$ (ordinea
+inversă a rezistenței observate). Transformer cedează mai puțin nu fiindcă ar reprezenta mai
+bine atacurile, ci fiindcă se sprijină pe o caracteristică pe care o generează victima și pe
+care atacatorul nu o poate atinge.
 
 \textbf{Apărarea.} Reantrenarea reduce evaziunea în cel mai rău caz sub $0{,}5\%$ la toate
 trei modelele, de la valori între $71\%$ și $97\%$, iar câștigul se menține față de grupul de
 control. Costul este sub $0{,}023$ de macro-$F1$, dar concentrat: clasa cea mai rară pierde
 între $0{,}075$ și $0{,}127$. Analiza sensibilității aplicată modelelor apărate arată prin ce
-s-a obținut rezultatul: TTL-ul sursă coboară de pe primele două poziții pe locurile 38--41 din
-42, iar $\rho$ scade la $7$--$19\%$.
+s-a obținut rezultatul: TTL-ul sursă coboară de pe primele două poziții pe locurile 38-41 din
+42, iar $\rho$ scade la $7$-$19\%$.
 
 \section{Testări și verificări}
 
@@ -169,11 +182,10 @@ lanț. Rezultatele:
 \begin{itemize}
 	\item execuția deterministă a fost verificată prin rulări repetate;
 	\item cele 28 de variante au trecut 1\,259 de verificări de validitate, fără nicio
-	încălcare, iar recalcularea caracteristicilor derivate a păstrat relațiile dintre ele cu o
-	eroare de ordinul $10^{-15}$;
+	încălcare, iar recalcularea caracteristicilor derivate a păstrat relațiile dintre ele;
 	\item toate variantele construite intenționat cu încălcarea constrângerilor au fost
 	respinse de verificări;
-	\item varianta care nu modifică nimic a reprodus exact predicțiile modelelor de referință;
+	\item varianta care nu modifică nimic a reprodus predicțiile modelelor de referință;
 	\item codul de evaluare folosit în etapa adversarială a reprodus, pe modelele de
 	referință, aceleași rate ca măsurarea inițială;
 	\item seturile utilizate pentru compararea modelelor au inclus între $96{,}3\%$ și
@@ -186,10 +198,10 @@ Formularea mulțimii perturbărilor admisibile și mecanismul de propagare care 
 consistența internă a variantelor generate. Raportarea sub formă de interval a caracteristicii
 nereconstituibile. Introducerea fracțiunii accesibile $\rho$, care leagă cantitativ importanța
 caracteristicilor de rata de evaziune. Protocolul experimental al apărării, cu grup de
-control, ponderi înghețate, mulțime comună și criterii stabilite și consemnate înaintea
-rulării. Grupul antrenat cu o familie exclusă deliberat, care a arătat că robustețea nu se
-generalizează. Aplicarea analizei de sensibilitate modelelor apărate, care a stabilit
-mecanismul apărării.
+control, ponderi de clasă identice pe toate grupurile, mulțime comună și criterii stabilite și consemnate înaintea
+rulării. Analiza de sensibilitate
+aplicată modelelor apărate, care a explicat mecanismul: ele au abandonat caracteristica
+accesibilă atacatorului, în loc să memoreze perturbările.
 
 \section{Surse de documentare}
 
@@ -212,7 +224,7 @@ mecanismul apărării.
 	4”, IETF RFC~6274, 2011.
 \end{thebibliography}
 
-\vspace{4mm}
+\vspace{2mm}
 \noindent
 \begin{tabular}{@{}p{5cm}p{3cm}p{6cm}}
 	Data: \rule{3cm}{0.4pt} & Autor & \rule{5.5cm}{0.4pt} \\[6mm]
